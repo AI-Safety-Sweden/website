@@ -1,11 +1,15 @@
 module Route.Index exposing (ActionData, Data, Model, Msg, route)
 
 import BackendTask exposing (BackendTask)
+import BackendTask.Http
+import Date
 import FatalError exposing (FatalError)
 import Head
 import Head.Seo as Seo
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Json.Decode as Decode
+import Json.Encode as Encode
 import Pages.Url
 import PagesMsg exposing (PagesMsg)
 import RouteBuilder exposing (App, StatelessRoute)
@@ -30,16 +34,22 @@ type alias RouteParams =
 
 
 type alias Data =
-    { nextEvent : Event
+    { nextEvent : Maybe Event
     }
 
 
 type alias Event =
     { title : String
-    , when : String
-    , venue : String
-    , format : String
-    , rsvpUrl : String
+    , start : String
+    , end : String
+    , url : String
+    , venue : Maybe Venue
+    }
+
+
+type alias Venue =
+    { name : String
+    , city : String
     }
 
 
@@ -56,17 +66,54 @@ route =
         |> RouteBuilder.buildNoState { view = view }
 
 
+{-| Fetched at build time because Meetup's API and iCal feed don't allow requests from the browser.
+-}
 data : BackendTask FatalError Data
 data =
-    BackendTask.succeed
-        { nextEvent =
-            { title = "[EVENT TITLE]"
-            , when = "Wednesday [DATE], [TIME]"
-            , venue = "[VENUE]"
-            , format = "[Discussion / Lecture / Social]"
-            , rsvpUrl = "#events"
-            }
-        }
+    BackendTask.Http.post
+        "https://api.meetup.com/gql-ext"
+        (BackendTask.Http.jsonBody
+            (Encode.object
+                [ ( "query"
+                  , Encode.string
+                        """query { groupByUrlname(urlname: "stockholm-ai-safety") { events(first: 1, status: ACTIVE, sort: ASC) { edges { node { title dateTime endTime eventUrl venues { name city } } } } } }"""
+                  )
+                ]
+            )
+        )
+        (BackendTask.Http.expectJson nextEventDecoder)
+        |> BackendTask.allowFatal
+        |> BackendTask.map (\nextEvent -> { nextEvent = nextEvent })
+
+
+meetupGroupUrl : String
+meetupGroupUrl =
+    "https://www.meetup.com/stockholm-ai-safety/"
+
+
+nextEventDecoder : Decode.Decoder (Maybe Event)
+nextEventDecoder =
+    Decode.at [ "data", "groupByUrlname", "events", "edges" ]
+        (Decode.list (Decode.field "node" eventDecoder))
+        |> Decode.map List.head
+
+
+eventDecoder : Decode.Decoder Event
+eventDecoder =
+    Decode.map5 Event
+        (Decode.field "title" Decode.string)
+        (Decode.field "dateTime" Decode.string)
+        (Decode.field "endTime" Decode.string)
+        (Decode.field "eventUrl" Decode.string)
+        (Decode.field "venues"
+            (Decode.list
+                (Decode.map2 Venue
+                    (Decode.field "name" Decode.string)
+                    (Decode.field "city" Decode.string)
+                )
+            )
+            |> Decode.map List.head
+        )
 
 
 description : String
@@ -107,7 +154,7 @@ view app _ =
     }
 
 
-hero : Event -> Html msg
+hero : Maybe Event -> Html msg
 hero nextEvent =
     Html.section
         (Style.container ++ [ Attr.style "padding-block" "clamp(48px, 12vw, 80px) clamp(64px, 14vw, 96px)" ])
@@ -186,8 +233,8 @@ buttonStyle =
     ]
 
 
-eventCard : Event -> Html msg
-eventCard event =
+eventCard : Maybe Event -> Html msg
+eventCard nextEvent =
     Html.aside
         [ Attr.attribute "aria-label" "Next event"
         , Attr.style "flex" "1 1 340px"
@@ -198,7 +245,7 @@ eventCard event =
         , Attr.style "border-radius" "20px"
         , Attr.style "background" Style.surface
         ]
-        [ Html.p
+        (Html.p
             [ Attr.style "margin" "0"
             , Attr.style "font-family" Style.fontDisplay
             , Attr.style "font-size" "13px"
@@ -208,43 +255,107 @@ eventCard event =
             , Attr.style "color" Style.accent
             ]
             [ Html.text "Next event" ]
-        , Html.p
-            [ Attr.style "margin" "14px 0 0"
-            , Attr.style "font-family" Style.fontDisplay
-            , Attr.style "font-size" "26px"
-            , Attr.style "font-weight" "600"
-            , Attr.style "line-height" "1.2"
-            , Attr.style "color" Style.textStrong
+            :: eventCardContent nextEvent
+        )
+
+
+eventCardContent : Maybe Event -> List (Html msg)
+eventCardContent nextEvent =
+    case nextEvent of
+        Just event ->
+            let
+                ( format, title ) =
+                    splitFormat event.title
+            in
+            [ eventTitle title
+            , Html.dl
+                [ Attr.style "margin" "20px 0 0"
+                , Attr.style "display" "grid"
+                , Attr.style "grid-template-columns" "auto minmax(0, 1fr)"
+                , Attr.style "gap" "10px 16px"
+                , Attr.style "font-size" "16px"
+                ]
+                (List.concat
+                    [ [ detailTerm "When", detailValue (formatWhen event.start event.end) ]
+                    , case event.venue of
+                        Just venue ->
+                            [ detailTerm "Where", detailValue (venue.name ++ ", " ++ venue.city) ]
+
+                        Nothing ->
+                            []
+                    , case format of
+                        Just format2 ->
+                            [ detailTerm "Format", detailValue format2 ]
+
+                        Nothing ->
+                            []
+                    ]
+                )
+            , eventLink event.url "RSVP"
             ]
-            [ Html.text event.title ]
-        , Html.dl
-            [ Attr.style "margin" "20px 0 0"
-            , Attr.style "display" "grid"
-            , Attr.style "grid-template-columns" "auto minmax(0, 1fr)"
-            , Attr.style "gap" "10px 16px"
-            , Attr.style "font-size" "16px"
+
+        Nothing ->
+            [ eventTitle "No upcoming events yet"
+            , eventLink meetupGroupUrl "See past events on Meetup"
             ]
-            [ detailTerm "When"
-            , detailValue event.when
-            , detailTerm "Where"
-            , detailValue (event.venue ++ ", Stockholm")
-            , detailTerm "Format"
-            , detailValue event.format
-            ]
-        , Html.a
-            [ Attr.href event.rsvpUrl
-            , Attr.style "margin-top" "20px"
-            , Attr.style "display" "inline-flex"
-            , Attr.style "align-items" "center"
-            , Attr.style "gap" "8px"
-            , Attr.style "min-height" "44px"
-            , Attr.style "color" Style.textStrong
-            , Attr.style "font-weight" "600"
-            ]
-            [ Html.text "RSVP"
-            , arrowIcon
-            ]
+
+
+eventTitle : String -> Html msg
+eventTitle title =
+    Html.p
+        [ Attr.style "margin" "14px 0 0"
+        , Attr.style "font-family" Style.fontDisplay
+        , Attr.style "font-size" "26px"
+        , Attr.style "font-weight" "600"
+        , Attr.style "line-height" "1.2"
+        , Attr.style "color" Style.textStrong
         ]
+        [ Html.text title ]
+
+
+eventLink : String -> String -> Html msg
+eventLink url label =
+    Html.a
+        [ Attr.href url
+        , Attr.style "margin-top" "20px"
+        , Attr.style "display" "inline-flex"
+        , Attr.style "align-items" "center"
+        , Attr.style "gap" "8px"
+        , Attr.style "min-height" "44px"
+        , Attr.style "color" Style.textStrong
+        , Attr.style "font-weight" "600"
+        ]
+        [ Html.text label
+        , arrowIcon
+        ]
+
+
+{-| Meetup titles start with the format in brackets, e.g. "[Reading Group] The Bottleneck in AI Safety".
+-}
+splitFormat : String -> ( Maybe String, String )
+splitFormat title =
+    case ( String.startsWith "[" title, String.indexes "]" title ) of
+        ( True, closing :: _ ) ->
+            ( Just (String.slice 1 closing title), String.trim (String.dropLeft (closing + 1) title) )
+
+        _ ->
+            ( Nothing, title )
+
+
+{-| Meetup gives times like "2026-10-28T18:00:00+01:00", already in Stockholm local time.
+-}
+formatWhen : String -> String -> String
+formatWhen start end =
+    let
+        day =
+            case Date.fromIsoString (String.left 10 start) of
+                Ok date ->
+                    Date.format "EEEE d MMMM" date
+
+                Err _ ->
+                    String.left 10 start
+    in
+    day ++ ", " ++ String.slice 11 16 start ++ "–" ++ String.slice 11 16 end
 
 
 detailTerm : String -> Html msg

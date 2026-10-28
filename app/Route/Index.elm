@@ -1,4 +1,4 @@
-module Route.Index exposing (ActionData, Data, Model, Msg, route)
+module Route.Index exposing (ActionData, Data, Event, Model, Msg, RouteParams, Venue, route)
 
 import BackendTask exposing (BackendTask)
 import BackendTask.Http
@@ -90,7 +90,7 @@ data =
                 ]
             )
         )
-        (BackendTask.Http.expectJson nextEventDecoder)
+        (BackendTask.Http.expectJson decodeNextEvent)
         |> BackendTask.allowFatal
         |> BackendTask.map (\nextEvent -> { nextEvent = nextEvent })
 
@@ -101,7 +101,7 @@ fetchNextEvent : Cmd Msg
 fetchNextEvent =
     Http.get
         { url = "/api/next-event"
-        , expect = Http.expectJson GotNextEvent nextEventDecoder
+        , expect = Http.expectJson GotNextEvent decodeNextEvent
         }
 
 
@@ -130,15 +130,15 @@ meetupGroupUrl =
     "https://www.meetup.com/stockholm-ai-safety/"
 
 
-nextEventDecoder : Decode.Decoder (Maybe Event)
-nextEventDecoder =
+decodeNextEvent : Decode.Decoder (Maybe Event)
+decodeNextEvent =
     Decode.at [ "data", "groupByUrlname", "events", "edges" ]
-        (Decode.list (Decode.field "node" eventDecoder))
+        (Decode.list (Decode.field "node" decodeEvent))
         |> Decode.map List.head
 
 
-eventDecoder : Decode.Decoder Event
-eventDecoder =
+decodeEvent : Decode.Decoder Event
+decodeEvent =
     Decode.map5 Event
         (Decode.field "title" Decode.string)
         (Decode.field "dateTime" Decode.string)

@@ -1,4 +1,4 @@
-module Style exposing (accent, background, border, borderButton, borderStrong, container, fontBody, fontDisplay, surface, text, textFaint, textMuted, textStrong)
+module Style exposing (accent, background, border, borderButton, borderStrong, container, fontDisplay, surface, text, textFaint, textMuted, textStrong)
 
 import Html
 import Html.Attributes as Attr
@@ -57,11 +57,6 @@ textFaint =
 fontDisplay : String
 fontDisplay =
     "'Space Grotesk', system-ui, sans-serif"
-
-
-fontBody : String
-fontBody =
-    "'IBM Plex Sans', system-ui, sans-serif"
 
 
 container : List (Html.Attribute msg)

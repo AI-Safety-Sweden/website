@@ -166,16 +166,16 @@ head :
 head _ =
     Seo.summary
         { canonicalUrlOverride = Nothing
-        , siteName = "Sweden AI Safety"
+        , siteName = "AI Safety Sweden"
         , image =
             { url = [ "favicon.ico" ] |> UrlPath.join |> Pages.Url.fromPath
-            , alt = "Sweden AI Safety"
+            , alt = "AI Safety Sweden"
             , dimensions = Nothing
             , mimeType = Nothing
             }
         , description = description
         , locale = Nothing
-        , title = "Sweden AI Safety"
+        , title = "AI Safety Sweden"
         }
         |> Seo.website
 
@@ -186,7 +186,7 @@ view :
     -> Model
     -> View (PagesMsg Msg)
 view _ _ model =
-    { title = "Sweden AI Safety"
+    { title = "AI Safety Sweden"
     , body =
         [ hero model.nextEvent
         , about
@@ -207,10 +207,9 @@ hero nextEvent =
             , Attr.style "letter-spacing" "-0.045em"
             , Attr.style "color" Style.textStrong
             ]
-            [ Html.text "Sweden"
+            [ Html.text "AI Safety"
             , Html.br [] []
-            , Html.span [] [ Html.text "AI " ]
-            , Html.span [ Attr.style "color" Style.accent ] [ Html.text "Safety" ]
+            , Html.span [ Attr.style "color" Style.accent ] [ Html.text "Sweden" ]
             ]
         , Html.div
             [ Attr.style "margin-top" "clamp(40px, 9vw, 64px)"

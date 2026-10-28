@@ -1,6 +1,6 @@
-# Sweden AI Safety website
+# AI Safety Sweden website
 
-Homepage for the Sweden AI Safety group in Stockholm, built with [elm-pages](https://elm-pages.com) v3.
+Homepage for the AI Safety Sweden group in Stockholm, built with [elm-pages](https://elm-pages.com) v3.
 
 ## Development
 

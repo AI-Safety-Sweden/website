@@ -77,7 +77,7 @@ data =
 
 siteName : String
 siteName =
-    "Sweden AI Safety"
+    "AI Safety Sweden"
 
 
 view :

@@ -1,0 +1,19 @@
+{
+  "data": {
+    "groupByUrlname": {
+      "events": {
+        "edges": [
+          {
+            "node": {
+              "title": "[Reading Group] The Bottleneck in AI Safety",
+              "dateTime": "2026-11-04T18:00:00+01:00",
+              "endTime": "2026-11-04T20:00:00+01:00",
+              "eventUrl": "https://www.meetup.com/stockholm-ai-safety/events/000000000/",
+              "venues": [{ "name": "Example Venue", "city": "Stockholm" }]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

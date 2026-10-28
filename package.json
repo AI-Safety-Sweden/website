@@ -3,7 +3,11 @@
   "type": "module",
   "scripts": {
     "start": "elm-pages dev",
-    "build": "elm-pages build"
+    "build": "elm-pages build",
+    "snapshot-tests": "cd visual-testing && ./run-snapshot-test.sh --view",
+    "snapshot-chrome": "cd visual-testing && SNAPSHOT_BROWSER=chrome ./run-snapshot-test.sh --view",
+    "snapshot-firefox": "cd visual-testing && SNAPSHOT_BROWSER=firefox ./run-snapshot-test.sh --view",
+    "snapshot-safari": "cd visual-testing && SNAPSHOT_BROWSER=safari ./run-snapshot-test.sh --view"
   },
   "devDependencies": {
     "elm": "^0.19.1-6",

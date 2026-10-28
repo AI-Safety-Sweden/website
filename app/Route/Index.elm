@@ -3,30 +3,33 @@ module Route.Index exposing (ActionData, Data, Model, Msg, route)
 import BackendTask exposing (BackendTask)
 import BackendTask.Http
 import Date
+import Effect exposing (Effect)
 import FatalError exposing (FatalError)
 import Head
 import Head.Seo as Seo
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Pages.Url
 import PagesMsg exposing (PagesMsg)
-import RouteBuilder exposing (App, StatelessRoute)
+import RouteBuilder exposing (App, StatefulRoute)
 import Shared
 import Style
 import Svg
 import Svg.Attributes as SvgAttr
-import UrlPath
+import UrlPath exposing (UrlPath)
 import View exposing (View)
 
 
 type alias Model =
-    {}
+    { nextEvent : Maybe Event
+    }
 
 
-type alias Msg =
-    ()
+type Msg
+    = GotNextEvent (Result Http.Error (Maybe Event))
 
 
 type alias RouteParams =
@@ -57,16 +60,22 @@ type alias ActionData =
     {}
 
 
-route : StatelessRoute RouteParams Data ActionData
+route : StatefulRoute RouteParams Data ActionData Model Msg
 route =
     RouteBuilder.single
         { head = head
         , data = data
         }
-        |> RouteBuilder.buildNoState { view = view }
+        |> RouteBuilder.buildWithLocalState
+            { view = view
+            , init = init
+            , update = update
+            , subscriptions = subscriptions
+            }
 
 
-{-| Fetched at build time because Meetup's API and iCal feed don't allow requests from the browser.
+{-| The next event as of the build, so the page shows something before the browser fetches the current one.
+The query matches the one in netlify/functions/next-event.mjs.
 -}
 data : BackendTask FatalError Data
 data =
@@ -84,6 +93,36 @@ data =
         (BackendTask.Http.expectJson nextEventDecoder)
         |> BackendTask.allowFatal
         |> BackendTask.map (\nextEvent -> { nextEvent = nextEvent })
+
+
+{-| Meetup's API doesn't allow browser requests, so this goes through the Netlify function in netlify/functions/next-event.mjs.
+-}
+fetchNextEvent : Cmd Msg
+fetchNextEvent =
+    Http.get
+        { url = "/api/next-event"
+        , expect = Http.expectJson GotNextEvent nextEventDecoder
+        }
+
+
+init : App Data ActionData RouteParams -> Shared.Model -> ( Model, Effect Msg )
+init app _ =
+    ( { nextEvent = app.data.nextEvent }, Effect.fromCmd fetchNextEvent )
+
+
+update : App Data ActionData RouteParams -> Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
+update _ _ msg model =
+    case msg of
+        GotNextEvent (Ok nextEvent) ->
+            ( { model | nextEvent = nextEvent }, Effect.none )
+
+        GotNextEvent (Err _) ->
+            ( model, Effect.none )
+
+
+subscriptions : RouteParams -> UrlPath -> Shared.Model -> Model -> Sub Msg
+subscriptions _ _ _ _ =
+    Sub.none
 
 
 meetupGroupUrl : String
@@ -144,11 +183,12 @@ head _ =
 view :
     App Data ActionData RouteParams
     -> Shared.Model
+    -> Model
     -> View (PagesMsg Msg)
-view app _ =
+view _ _ model =
     { title = "Sweden AI Safety"
     , body =
-        [ hero app.data.nextEvent
+        [ hero model.nextEvent
         , about
         ]
     }

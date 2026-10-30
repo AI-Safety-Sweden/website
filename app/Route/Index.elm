@@ -192,7 +192,7 @@ view _ _ model =
 hero : Maybe Event -> Html msg
 hero nextEvent =
     Html.section
-        (Style.container ++ [ Attr.style "padding-block" "clamp(48px, 12vw, 80px) clamp(64px, 14vw, 96px)" ])
+        (Style.container ++ [ Attr.style "padding-block" "clamp(32px, 8vw, 56px) clamp(64px, 14vw, 96px)" ])
         [ Html.h1
             [ Attr.style "margin" "0"
             , Attr.style "font-family" Style.fontDisplay

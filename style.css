@@ -9,3 +9,8 @@ body {
 
 a { color: #C9CFDD; }
 a:hover { color: #FFFFFF; }
+
+/* Inline styles can't use media queries. */
+@media (max-width: 640px) {
+  #top > header { display: none; }
+}

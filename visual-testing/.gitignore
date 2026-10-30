@@ -1,0 +1,5 @@
+node_modules
+.DS_Store
+snapshots
+elm-stuff
+dist/snapshot-viewer.js

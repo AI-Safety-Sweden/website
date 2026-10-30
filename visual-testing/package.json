@@ -1,0 +1,10 @@
+{
+  "name": "visual-testing",
+  "private": true,
+  "description": "Visual snapshot tests, see readme.md",
+  "dependencies": {
+    "express": "^4.19.2",
+    "odiff-bin": "^3.0.0",
+    "playwright": "1.63.0"
+  }
+}

@@ -1,0 +1,16 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #0B1020;
+  color: #E9ECF4;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+a { color: #C9CFDD; }
+a:hover { color: #FFFFFF; }
+
+/* Inline styles can't use media queries. */
+@media (max-width: 640px) {
+  #top > header { display: none; }
+}

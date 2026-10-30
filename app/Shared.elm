@@ -1,4 +1,4 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), template)
+module Shared exposing (Data, Model, Msg(..), SharedMsg(..), meetupGroupUrl, template)
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
@@ -187,7 +187,7 @@ footer =
                     (\( href, label ) ->
                         Html.a [ Attr.href href, Attr.style "padding" "12px 10px" ] [ Html.text label ]
                     )
-                    navLinks
+                    externalLinks
                 )
             ]
         ]
@@ -195,8 +195,41 @@ footer =
 
 navLinks : List ( String, String )
 navLinks =
-    [ ( "#blog", "Blog" )
+    [ ( substackUrl, "Blog" )
     , ( "#events", "Events" )
     , ( "#contact", "Contact" )
     , ( "#about", "About Us" )
     ]
+
+
+externalLinks : List ( String, String )
+externalLinks =
+    [ ( substackUrl, "Substack" )
+    , ( meetupGroupUrl, "Meetup" )
+    , ( lumaUrl, "Luma" )
+    , ( discordUrl, "Discord" )
+    ]
+
+
+substackUrl : String
+substackUrl =
+    "https://substack.com/@aisafetysweden"
+
+
+meetupGroupUrl : String
+meetupGroupUrl =
+    "https://www.meetup.com/stockholm-ai-safety/"
+
+
+{-| Placeholder until the group has a Luma page.
+-}
+lumaUrl : String
+lumaUrl =
+    "#"
+
+
+{-| Placeholder until the group has a Discord invite link.
+-}
+discordUrl : String
+discordUrl =
+    "#"

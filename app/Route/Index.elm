@@ -125,11 +125,6 @@ subscriptions _ _ _ _ =
     Sub.none
 
 
-meetupGroupUrl : String
-meetupGroupUrl =
-    "https://www.meetup.com/stockholm-ai-safety/"
-
-
 decodeNextEvent : Decode.Decoder (Maybe Event)
 decodeNextEvent =
     Decode.at [ "data", "groupByUrlname", "events", "edges" ]
@@ -301,7 +296,7 @@ eventCard nextEvent =
                 ]
                 [ Html.text "Next event" ]
             , Html.a
-                [ Attr.href meetupGroupUrl
+                [ Attr.href Shared.meetupGroupUrl
                 , Attr.style "display" "inline-flex"
                 , Attr.style "align-items" "center"
                 , Attr.style "gap" "6px"
@@ -355,7 +350,7 @@ eventCardContent nextEvent =
 
         Nothing ->
             [ eventTitle "No upcoming events yet"
-            , eventLink meetupGroupUrl "See past events on Meetup"
+            , eventLink Shared.meetupGroupUrl "See past events on Meetup"
             ]
 
 

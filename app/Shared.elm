@@ -10,6 +10,8 @@ import Pages.PageUrl exposing (PageUrl)
 import Route exposing (Route)
 import SharedTemplate exposing (SharedTemplate)
 import Style
+import Svg
+import Svg.Attributes as SvgAttr
 import UrlPath exposing (UrlPath)
 import View exposing (View)
 
@@ -129,15 +131,7 @@ header =
                 , Attr.style "font-weight" "700"
                 , Attr.style "letter-spacing" "-0.01em"
                 ]
-                [ Html.span
-                    [ Attr.attribute "aria-hidden" "true"
-                    , Attr.style "display" "block"
-                    , Attr.style "width" "12px"
-                    , Attr.style "height" "12px"
-                    , Attr.style "border-radius" "999px"
-                    , Attr.style "background" Style.accent
-                    ]
-                    []
+                [ treeLogo
                 , Html.span [] [ Html.text siteName ]
                 ]
             , Html.div
@@ -233,3 +227,60 @@ lumaUrl =
 discordUrl : String
 discordUrl =
     "#"
+
+
+treeLogo : Html msg
+treeLogo =
+    let
+        branch : Float -> Float -> Float -> Float -> Svg.Svg msg
+        branch x1 y1 x2 y2 =
+            Svg.line
+                [ SvgAttr.x1 (String.fromFloat x1)
+                , SvgAttr.y1 (String.fromFloat y1)
+                , SvgAttr.x2 (String.fromFloat x2)
+                , SvgAttr.y2 (String.fromFloat y2)
+                ]
+                []
+
+        node : Float -> Float -> Svg.Svg msg
+        node cx cy =
+            Svg.circle
+                [ SvgAttr.cx (String.fromFloat cx)
+                , SvgAttr.cy (String.fromFloat cy)
+                , SvgAttr.r "2.5"
+                ]
+                []
+    in
+    Svg.svg
+        [ SvgAttr.width "36"
+        , SvgAttr.height "36"
+        , SvgAttr.viewBox "0 0 48 48"
+        , SvgAttr.stroke "#ffffff"
+        , Attr.attribute "aria-hidden" "true"
+        ]
+        [ Svg.g
+            [ SvgAttr.fill "none"
+            , SvgAttr.strokeWidth "2.6"
+            , SvgAttr.strokeLinecap "round"
+            ]
+            [ branch 24 8.6 24 48
+            , branch 24 16 16 21.6
+            , branch 24 16 32 21.6
+            , branch 24 25 12 33.4
+            , branch 24 25 36 33.4
+            , branch 24 34 8 45.2
+            , branch 24 34 40 45.2
+            ]
+        , Svg.g
+            [ SvgAttr.fill Style.background
+            , SvgAttr.strokeWidth "2.3"
+            ]
+            [ node 24 6
+            , node 16 21.6
+            , node 32 21.6
+            , node 12 33.4
+            , node 36 33.4
+            , node 8 45.2
+            , node 40 45.2
+            ]
+        ]

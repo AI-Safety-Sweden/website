@@ -192,42 +192,41 @@ view _ _ model =
 hero : Maybe Event -> Html msg
 hero nextEvent =
     Html.section
-        (Style.container ++ [ Attr.style "padding-block" "clamp(32px, 8vw, 56px) clamp(64px, 14vw, 96px)" ])
-        [ Html.h1
-            [ Attr.style "margin" "0"
-            , Attr.style "font-family" Style.fontDisplay
-            , Attr.style "font-weight" "700"
-            , Attr.style "font-size" "clamp(64px, 11vw, 168px)"
-            , Attr.style "line-height" "0.9"
-            , Attr.style "letter-spacing" "-0.045em"
-            , Attr.style "color" Style.textStrong
+        (Style.container
+            ++ [ Attr.style "padding-block" "clamp(40px, 9vw, 80px)"
+               , Attr.style "display" "flex"
+               , Attr.style "flex-wrap" "wrap"
+               , Attr.style "gap" "48px 64px"
+               , Attr.style "align-items" "center"
+               , Attr.style "justify-content" "space-between"
+               ]
+        )
+        [ Html.div
+            [ Attr.style "flex" "1 1 520px"
+            , Attr.style "min-width" "0"
             ]
-            [ Html.text "AI Safety"
-            , Html.br [] []
-            , Html.span [ Attr.style "color" Style.accent ] [ Html.text "Sweden" ]
-            ]
-        , Html.div
-            [ Attr.style "margin-top" "clamp(40px, 9vw, 64px)"
-            , Attr.style "display" "flex"
-            , Attr.style "flex-wrap" "wrap"
-            , Attr.style "gap" "40px"
-            , Attr.style "align-items" "flex-end"
-            , Attr.style "justify-content" "space-between"
-            ]
-            [ Html.div
-                [ Attr.style "flex" "1 1 420px"
-                , Attr.style "min-width" "0"
+            [ Html.h1
+                [ Attr.style "margin" "0"
+                , Attr.style "font-family" Style.fontDisplay
+                , Attr.style "font-weight" "700"
+                , Attr.style "font-size" "clamp(64px, 11vw, 168px)"
+                , Attr.style "line-height" "0.9"
+                , Attr.style "letter-spacing" "-0.045em"
+                , Attr.style "color" Style.textStrong
+                ]
+                [ Html.text "AI Safety"
+                , Html.br [] []
+                , Html.span [ Attr.style "color" Style.accent ] [ Html.text "Sweden" ]
+                ]
+            , Html.p
+                [ Attr.style "margin" "clamp(28px, 5vw, 40px) 0 0"
                 , Attr.style "max-width" "560px"
+                , Attr.style "font-size" "clamp(20px, 3.5vw, 24px)"
+                , Attr.style "line-height" "1.45"
                 ]
-                [ Html.p
-                    [ Attr.style "margin" "0"
-                    , Attr.style "font-size" "clamp(20px, 3.5vw, 24px)"
-                    , Attr.style "line-height" "1.45"
-                    ]
-                    [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
-                ]
-            , eventCard nextEvent
+                [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
             ]
+        , eventCard nextEvent
         ]
 
 
@@ -427,7 +426,7 @@ about =
         ]
         [ Html.div
             (Style.container
-                ++ [ Attr.style "padding-block" "clamp(64px, 14vw, 96px)"
+                ++ [ Attr.style "padding-block" "clamp(56px, 10vw, 72px)"
                    , Attr.style "display" "flex"
                    , Attr.style "flex-wrap" "wrap"
                    , Attr.style "gap" "32px 80px"

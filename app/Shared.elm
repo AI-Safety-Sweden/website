@@ -138,7 +138,7 @@ header =
                 [ Attr.style "display" "flex"
                 , Attr.style "flex-wrap" "wrap"
                 , Attr.style "gap" "4px 8px"
-                , Attr.style "font-size" "15px"
+                , Attr.style "font-size" "16px"
                 , Attr.style "font-weight" "500"
                 ]
                 (List.map
@@ -167,7 +167,7 @@ footer =
                    , Attr.style "justify-content" "space-between"
                    , Attr.style "align-items" "center"
                    , Attr.style "gap" "12px"
-                   , Attr.style "font-size" "15px"
+                   , Attr.style "font-size" "16px"
                    , Attr.style "color" Style.textFaint
                    ]
             )

@@ -121,6 +121,7 @@ header =
             )
             [ Html.a
                 [ Attr.href "#top"
+                , Attr.attribute "aria-label" siteName
                 , Attr.style "display" "flex"
                 , Attr.style "align-items" "center"
                 , Attr.style "gap" "10px"
@@ -133,7 +134,7 @@ header =
                 , Attr.style "letter-spacing" "-0.01em"
                 ]
                 [ treeLogo
-                , Html.span [] [ Html.text siteName ]
+                , Html.span [ Attr.class "site-title" ] [ Html.text siteName ]
                 ]
             , Html.div
                 [ Attr.style "display" "flex"

@@ -442,7 +442,7 @@ about =
                 , Attr.style "text-transform" "uppercase"
                 , Attr.style "color" Style.accent
                 ]
-                [ Html.text "About the group" ]
+                [ Html.text "About us" ]
             , Html.div
                 [ Attr.style "flex" "999 1 560px"
                 , Attr.style "min-width" "0"

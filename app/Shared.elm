@@ -106,7 +106,8 @@ view _ _ _ _ pageView =
 
 header : Html msg
 header =
-    Html.header [ Attr.style "border-bottom" ("1px solid " ++ Style.border) ]
+    Html.header
+        [ Attr.style "border-bottom" ("1px solid " ++ Style.border) ]
         [ Html.nav
             (Style.container
                 ++ [ Attr.attribute "aria-label" "Main"
@@ -115,7 +116,7 @@ header =
                    , Attr.style "align-items" "center"
                    , Attr.style "justify-content" "space-between"
                    , Attr.style "gap" "12px"
-                   , Attr.style "padding-block" "20px"
+                   , Attr.style "padding-block" "8px"
                    ]
             )
             [ Html.a

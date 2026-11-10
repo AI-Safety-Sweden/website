@@ -224,7 +224,7 @@ hero nextEvent =
                     , Attr.style "font-size" "clamp(20px, 3.5vw, 24px)"
                     , Attr.style "line-height" "1.45"
                     ]
-                    [ Html.text "A space to discuss the development of beneficial AI, with talks, debates and socials in Stockholm." ]
+                    [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
                 , Html.div
                     [ Attr.style "margin-top" "32px"
                     , Attr.style "display" "flex"

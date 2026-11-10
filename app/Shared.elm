@@ -189,9 +189,7 @@ footer =
 
 navLinks : List ( String, String )
 navLinks =
-    [ ( substackUrl, "Blog" )
-    , ( "#events", "Events" )
-    , ( "#contact", "Contact" )
+    [ ( "#contact", "Contact" )
     , ( "#about", "About Us" )
     ]
 
@@ -254,7 +252,7 @@ treeLogo =
     Svg.svg
         [ SvgAttr.width "36"
         , SvgAttr.height "36"
-        , SvgAttr.viewBox "0 0 48 48"
+        , SvgAttr.viewBox "-1 0 50 50"
         , SvgAttr.stroke "#ffffff"
         , Attr.attribute "aria-hidden" "true"
         ]

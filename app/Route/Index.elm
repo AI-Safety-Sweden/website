@@ -225,46 +225,10 @@ hero nextEvent =
                     , Attr.style "line-height" "1.45"
                     ]
                     [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
-                , Html.div
-                    [ Attr.style "margin-top" "32px"
-                    , Attr.style "display" "flex"
-                    , Attr.style "flex-wrap" "wrap"
-                    , Attr.style "gap" "12px"
-                    ]
-                    [ Html.a
-                        (buttonStyle
-                            ++ [ Attr.href "#events"
-                               , Attr.style "background" Style.accent
-                               , Attr.style "color" Style.background
-                               ]
-                        )
-                        [ Html.text "Upcoming events" ]
-                    , Html.a
-                        (buttonStyle
-                            ++ [ Attr.href "#about"
-                               , Attr.style "border" ("1px solid " ++ Style.borderButton)
-                               , Attr.style "color" Style.text
-                               ]
-                        )
-                        [ Html.text "About us" ]
-                    ]
                 ]
             , eventCard nextEvent
             ]
         ]
-
-
-buttonStyle : List (Html.Attribute msg)
-buttonStyle =
-    [ Attr.style "display" "inline-flex"
-    , Attr.style "align-items" "center"
-    , Attr.style "min-height" "52px"
-    , Attr.style "padding" "0 26px"
-    , Attr.style "border-radius" "999px"
-    , Attr.style "text-decoration" "none"
-    , Attr.style "font-size" "16px"
-    , Attr.style "font-weight" "600"
-    ]
 
 
 eventCard : Maybe Event -> Html msg

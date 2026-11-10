@@ -494,7 +494,7 @@ about =
                     , Attr.style "font-weight" "500"
                     , Attr.style "color" Style.textStrong
                     ]
-                    [ Html.text "This group is for anyone interested in discussing the potential societal effects of artificial intelligence. Our mission is to raise awareness and provide a space for the discussion of the development of beneficial AI in a Swedish context. Whether you are a researcher, developer, policymaker, or are simply curious about the implications of AI, you are welcome to participate." ]
+                    [ Html.text "AI has the potential to greatly benefit humanity, but there are existential risks in developing it too quickly and recklessly. We want to help inform the public and politicians about these risks as well offer a social space where people can discuss and learn more about AI." ]
                 , Html.div
                     [ Attr.style "margin-top" "40px"
                     , Attr.style "max-width" "680px"
@@ -505,8 +505,8 @@ about =
                     , Attr.style "line-height" "1.7"
                     , Attr.style "color" Style.textMuted
                     ]
-                    [ Html.p [ Attr.style "margin" "0" ] [ Html.text "We host events every other Wednesday evening. Our events span a range of formats and topics, including discussions, lectures, and debates, and cover everything from technical and philosophical topics to political and societal impacts. We also host more casual social events where you can get to know others in the area who want to better understand the huge potential impacts of this technology." ]
-                    , Html.p [ Attr.style "margin" "0" ] [ Html.text "We're new to Meetup but have been around for a few years elsewhere. We hope to see you at an upcoming event!" ]
+                    [ Html.p [ Attr.style "margin" "0" ] [ Html.text "Events are typically Wednesday and Thursday evening, located in Stockholm and Göteborg. They include discussions, lectures, workshops, and debates, and cover everything from technical and philosophical topics to political and societal impacts." ]
+                    , Html.p [ Attr.style "margin" "0" ] [ Html.text "We hope to see you at an upcoming event!" ]
                     ]
                 ]
             ]

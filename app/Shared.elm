@@ -106,7 +106,7 @@ view _ _ _ _ pageView =
 
 header : Html msg
 header =
-    Html.header []
+    Html.header [ Attr.style "border-bottom" ("1px solid " ++ Style.border) ]
         [ Html.nav
             (Style.container
                 ++ [ Attr.attribute "aria-label" "Main"
@@ -198,7 +198,6 @@ externalLinks : List ( String, String )
 externalLinks =
     [ ( substackUrl, "Substack" )
     , ( meetupGroupUrl, "Meetup" )
-    , ( lumaUrl, "Luma" )
     , ( discordUrl, "Discord" )
     ]
 
@@ -211,13 +210,6 @@ substackUrl =
 meetupGroupUrl : String
 meetupGroupUrl =
     "https://www.meetup.com/stockholm-ai-safety/"
-
-
-{-| Placeholder until the group has a Luma page.
--}
-lumaUrl : String
-lumaUrl =
-    "#"
 
 
 {-| Placeholder until the group has a Discord invite link.

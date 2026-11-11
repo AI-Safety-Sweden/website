@@ -511,11 +511,16 @@ groups =
         ]
 
 
+type LabelSide
+    = LabelLeft
+    | LabelRight
+
+
 groupsMap : Html msg
 groupsMap =
     let
-        city : String -> Float -> Float -> Svg.Svg msg
-        city name x y =
+        city : LabelSide -> String -> Float -> Float -> Svg.Svg msg
+        city side name x y =
             Svg.g []
                 [ Svg.circle
                     [ SvgAttr.cx (String.fromFloat x)
@@ -525,10 +530,27 @@ groupsMap =
                     ]
                     []
                 , Svg.text_
-                    [ SvgAttr.x (String.fromFloat (x + 14))
+                    [ SvgAttr.x
+                        (String.fromFloat
+                            (case side of
+                                LabelLeft ->
+                                    x - 14
+
+                                LabelRight ->
+                                    x + 14
+                            )
+                        )
+                    , SvgAttr.textAnchor
+                        (case side of
+                            LabelLeft ->
+                                "end"
+
+                            LabelRight ->
+                                "start"
+                        )
                     , SvgAttr.y (String.fromFloat (y + 6))
                     , SvgAttr.fill Style.textStrong
-                    , SvgAttr.fontSize "20"
+                    , SvgAttr.fontSize "18"
                     , SvgAttr.fontWeight "600"
                     , SvgAttr.stroke Style.surface
                     , SvgAttr.strokeWidth "4"
@@ -542,7 +564,7 @@ groupsMap =
         , SvgAttr.width "100%"
         , SvgAttr.style "display: block; max-width: 220px; height: auto; font-family: 'Space Grotesk', system-ui, sans-serif"
         , Attr.attribute "role" "img"
-        , Attr.attribute "aria-label" "Map of Sweden with groups in Stockholm and Göteborg"
+        , Attr.attribute "aria-label" "Map of Sweden with groups in Stockholm, Uppsala, Örebro, Linköping and Lund/Malmö"
         ]
         [ Svg.path
             [ SvgAttr.d swedenOutline
@@ -552,8 +574,11 @@ groupsMap =
             , SvgAttr.strokeLinejoin "round"
             ]
             []
-        , city "Stockholm" 159.7 476.9
-        , city "Göteborg" 19.0 556.4
+        , city LabelRight "Stockholm" 159.7 476.9
+        , city LabelRight "Uppsala" 149.7 450.8
+        , city LabelLeft "Örebro" 93.7 479.8
+        , city LabelLeft "Linköping" 103.2 522.1
+        , city LabelRight "Lund/Malmö" 45.0 657.7
         ]
 
 

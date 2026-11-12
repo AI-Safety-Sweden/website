@@ -268,7 +268,7 @@ treeLogo =
         [ SvgAttr.width "36"
         , SvgAttr.height "36"
         , SvgAttr.viewBox "-1 0 50 50"
-        , SvgAttr.stroke "#ffffff"
+        , SvgAttr.stroke Style.accent
         , Attr.attribute "aria-hidden" "true"
         ]
         [ Svg.g

@@ -6,42 +6,42 @@ import Html.Attributes as Attr
 
 accent : String
 accent =
-    "#F5C542"
+    "#3B5E4C"
 
 
 background : String
 background =
-    "#0B1020"
+    "#FFFFFF"
 
 
 surface : String
 surface =
-    "#111833"
+    "#F3F6F4"
 
 
 border : String
 border =
-    "#1E2642"
+    "#E1E7E3"
 
 
 borderStrong : String
 borderStrong =
-    "#273150"
+    "#C9D3CD"
 
 
 textStrong : String
 textStrong =
-    "#F2F4F9"
+    "#0B100D"
 
 
 textMuted : String
 textMuted =
-    "#B8C0D4"
+    "#3F4843"
 
 
 textFaint : String
 textFaint =
-    "#9BA4BC"
+    "#626B66"
 
 
 fontDisplay : String

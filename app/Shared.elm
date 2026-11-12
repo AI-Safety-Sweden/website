@@ -107,7 +107,9 @@ view _ _ _ _ pageView =
 header : Html msg
 header =
     Html.header
-        [ Attr.style "border-bottom" ("1px solid " ++ Style.border) ]
+        [ Attr.style "background" Style.chrome
+        , Attr.style "border-bottom" ("1px solid " ++ Style.borderStrong)
+        ]
         [ Html.nav
             (Style.container
                 ++ [ Attr.attribute "aria-label" "Main"
@@ -176,7 +178,10 @@ header =
 
 footer : Html msg
 footer =
-    Html.footer [ Attr.style "border-top" ("1px solid " ++ Style.border) ]
+    Html.footer
+        [ Attr.style "background" Style.chrome
+        , Attr.style "border-top" ("1px solid " ++ Style.borderStrong)
+        ]
         [ Html.div
             (Style.container
                 ++ [ Attr.style "padding-block" "28px 36px"
@@ -285,7 +290,7 @@ treeLogo =
             , branch 24 34 40 45.2
             ]
         , Svg.g
-            [ SvgAttr.fill Style.background
+            [ SvgAttr.fill Style.chrome
             , SvgAttr.strokeWidth "2.3"
             ]
             [ node 24 6

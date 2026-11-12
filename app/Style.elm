@@ -1,4 +1,4 @@
-module Style exposing (accent, background, border, borderStrong, container, fontDisplay, surface, textFaint, textMuted, textStrong)
+module Style exposing (accent, background, border, borderStrong, chrome, container, fontDisplay, surface, textFaint, textMuted, textStrong)
 
 import Html
 import Html.Attributes as Attr
@@ -12,6 +12,11 @@ accent =
 background : String
 background =
     "#FFFFFF"
+
+
+chrome : String
+chrome =
+    "#E6EEE9"
 
 
 surface : String

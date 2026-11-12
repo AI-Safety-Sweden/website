@@ -173,7 +173,12 @@ footer =
                    , Attr.style "color" Style.textFaint
                    ]
             )
-            [ Html.span [] [ Html.text (siteName ++ " · Stockholm, Sweden") ]
+            [ Html.div
+                [ Attr.style "display" "flex"
+                , Attr.style "align-items" "center"
+                , Attr.style "gap" "12px"
+                ]
+                [ treeLogo, Html.text siteName ]
             , Html.div
                 [ Attr.style "display" "flex"
                 , Attr.style "flex-wrap" "wrap"
@@ -181,7 +186,7 @@ footer =
                 ]
                 (List.map
                     (\( href, label ) ->
-                        Html.a [ Attr.href href, Attr.style "padding" "12px 10px" ] [ Html.text label ]
+                        Html.a [ Attr.href href, Attr.style "padding" "12px 4px" ] [ Html.text label ]
                     )
                     externalLinks
                 )

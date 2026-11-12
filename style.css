@@ -17,3 +17,5 @@ a:hover { color: #FFFFFF; }
   .nav-link { padding-inline: 8px !important; }
   .join-button { margin-left: 4px !important; padding-inline: 14px !important; }
 }
+
+#nl-badge-frame { display: none !important; }

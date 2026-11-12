@@ -469,7 +469,7 @@ about =
                     , Attr.style "line-height" "1.7"
                     , Attr.style "color" Style.textMuted
                     ]
-                    [ Html.p [ Attr.style "margin" "0" ] [ Html.text "Events are typically Wednesday and Thursday evening, located in Stockholm and Göteborg. They include discussions, lectures, workshops, and debates, and cover everything from technical and philosophical topics to political and societal impacts." ]
+                    [ Html.p [ Attr.style "margin" "0" ] [ Html.text "Events are typically Wednesday and Thursday evening. They include discussions, lectures, workshops, and debates, and cover everything from technical and philosophical topics to political and societal impacts." ]
                     , Html.p [ Attr.style "margin" "0" ] [ Html.text "We hope to see you at an upcoming event!" ]
                     ]
                 ]

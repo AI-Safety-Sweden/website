@@ -211,8 +211,8 @@ hero nextEvent =
                 , Attr.style "font-family" Style.fontDisplay
                 , Attr.style "font-weight" "700"
                 , Attr.style "font-size" "clamp(64px, 11vw, 168px)"
-                , Attr.style "line-height" "0.9"
-                , Attr.style "letter-spacing" "-0.045em"
+                , Attr.style "line-height" "0.95"
+                , Attr.style "letter-spacing" "-0.02em"
                 , Attr.style "color" Style.textStrong
                 ]
                 [ Html.text "AI Safety"
@@ -251,7 +251,7 @@ eventCard nextEvent =
             ]
             [ Html.p
                 [ Attr.style "margin" "0"
-                , Attr.style "font-family" Style.fontDisplay
+                , Attr.style "font-family" Style.fontSans
                 , Attr.style "font-size" "13px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.1em"
@@ -436,7 +436,7 @@ about =
             [ Html.h2
                 [ Attr.style "flex" "1 1 220px"
                 , Attr.style "margin" "0"
-                , Attr.style "font-family" Style.fontDisplay
+                , Attr.style "font-family" Style.fontSans
                 , Attr.style "font-size" "15px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.08em"
@@ -494,7 +494,7 @@ groups =
             [ Html.h2
                 [ Attr.style "flex" "1 1 220px"
                 , Attr.style "margin" "0"
-                , Attr.style "font-family" Style.fontDisplay
+                , Attr.style "font-family" Style.fontSans
                 , Attr.style "font-size" "15px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.08em"
@@ -562,7 +562,7 @@ groupsMap =
     Svg.svg
         [ SvgAttr.viewBox "0 0 300 672.6"
         , SvgAttr.width "100%"
-        , SvgAttr.style "display: block; max-width: 220px; height: auto; font-family: 'Space Grotesk', system-ui, sans-serif"
+        , SvgAttr.style "display: block; max-width: 220px; height: auto; font-family: 'IBM Plex Sans', system-ui, sans-serif"
         , Attr.attribute "role" "img"
         , Attr.attribute "aria-label" "Map of Sweden with groups in Stockholm, Uppsala, Örebro, Linköping and Lund/Malmö"
         ]

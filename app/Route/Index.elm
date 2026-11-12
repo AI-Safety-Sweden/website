@@ -211,8 +211,8 @@ hero nextEvent =
                 , Attr.style "font-family" Style.fontDisplay
                 , Attr.style "font-weight" "700"
                 , Attr.style "font-size" "clamp(64px, 11vw, 168px)"
-                , Attr.style "line-height" "0.9"
-                , Attr.style "letter-spacing" "-0.045em"
+                , Attr.style "line-height" "0.95"
+                , Attr.style "letter-spacing" "-0.04em"
                 , Attr.style "color" Style.textStrong
                 ]
                 [ Html.text "AI Safety"
@@ -226,9 +226,44 @@ hero nextEvent =
                 , Attr.style "line-height" "1.45"
                 ]
                 [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
+            , Html.a
+                [ Attr.href Shared.discordUrl
+                , Attr.style "display" "inline-block"
+                , Attr.style "margin-top" "28px"
+                , Attr.style "padding" "24px 16px 24px 32px"
+                , Attr.style "border-radius" "16px"
+                , Attr.style "background" Style.accent
+                , Attr.style "color" Style.background
+                , Attr.style "font-size" "20px"
+                , Attr.style "font-weight" "600"
+                , Attr.style "text-decoration" "none"
+                , Attr.style "white-space" "pre"
+                , Attr.style "line-height" "1.5"
+                ]
+                [ Html.div
+                    [ Attr.style "display" "flex", Attr.style "align-items" "center", Attr.style "gap" "16px" ]
+                    [ Html.text "Take part in the future.\nBecome a member"
+                    , Html.div
+                        [ Attr.style "display" "inline-block"
+                        , Attr.style "font-size" "32px"
+                        , Attr.style "display" "flex"
+                        ]
+                        [ arrowRight ]
+                    ]
+                ]
             ]
         , eventCard nextEvent
         ]
+
+
+arrowRight : Html msg
+arrowRight =
+    Svg.svg
+        [ SvgAttr.viewBox "0 0 20 20"
+        , SvgAttr.fill "currentColor"
+        , SvgAttr.width "48px"
+        ]
+        [ Svg.path [ SvgAttr.fillRule "evenodd", SvgAttr.d "M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z", SvgAttr.clipRule "evenodd" ] [] ]
 
 
 eventCard : Maybe Event -> Html msg
@@ -251,8 +286,8 @@ eventCard nextEvent =
             ]
             [ Html.p
                 [ Attr.style "margin" "0"
-                , Attr.style "font-family" Style.fontDisplay
-                , Attr.style "font-size" "13px"
+                , Attr.style "font-family" Style.fontSans
+                , Attr.style "font-size" "15px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.1em"
                 , Attr.style "text-transform" "uppercase"
@@ -436,8 +471,8 @@ about =
             [ Html.h2
                 [ Attr.style "flex" "1 1 220px"
                 , Attr.style "margin" "0"
-                , Attr.style "font-family" Style.fontDisplay
-                , Attr.style "font-size" "15px"
+                , Attr.style "font-family" Style.fontSans
+                , Attr.style "font-size" "18px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.08em"
                 , Attr.style "text-transform" "uppercase"
@@ -494,8 +529,8 @@ groups =
             [ Html.h2
                 [ Attr.style "flex" "1 1 220px"
                 , Attr.style "margin" "0"
-                , Attr.style "font-family" Style.fontDisplay
-                , Attr.style "font-size" "15px"
+                , Attr.style "font-family" Style.fontSans
+                , Attr.style "font-size" "18px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.08em"
                 , Attr.style "text-transform" "uppercase"
@@ -562,7 +597,7 @@ groupsMap =
     Svg.svg
         [ SvgAttr.viewBox "0 0 300 672.6"
         , SvgAttr.width "100%"
-        , SvgAttr.style "display: block; max-width: 220px; height: auto; font-family: 'Space Grotesk', system-ui, sans-serif"
+        , SvgAttr.style "display: block; max-width: 220px; height: auto; font-family: 'IBM Plex Sans', system-ui, sans-serif"
         , Attr.attribute "role" "img"
         , Attr.attribute "aria-label" "Map of Sweden with groups in Stockholm, Uppsala, Örebro, Linköping and Lund/Malmö"
         ]

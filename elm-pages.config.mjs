@@ -6,7 +6,7 @@ export default {
     return `
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
 <link rel="stylesheet" href="/style.css" />
 <script defer src="/remove-netlify-badge.js"></script>
 <meta name="generator" content="elm-pages v${context.cliVersion}" />

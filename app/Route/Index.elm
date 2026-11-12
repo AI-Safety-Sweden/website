@@ -217,7 +217,11 @@ hero nextEvent =
                 ]
                 [ Html.text "AI Safety"
                 , Html.br [] []
-                , Html.span [ Attr.style "color" Style.accent ] [ Html.text "Sweden" ]
+                , Html.span
+                    [ Attr.style "color" Style.accent
+                    , Attr.style "padding-left" "1.5px"
+                    ]
+                    [ Html.text "Sweden" ]
                 ]
             , Html.p
                 [ Attr.style "margin" "clamp(28px, 5vw, 40px) 0 0"

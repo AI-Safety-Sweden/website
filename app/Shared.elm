@@ -137,7 +137,8 @@ header =
                 , Html.span [ Attr.class "site-title" ] [ Html.text siteName ]
                 ]
             , Html.div
-                [ Attr.style "display" "flex"
+                [ Attr.class "nav-links"
+                , Attr.style "display" "flex"
                 , Attr.style "flex-wrap" "wrap"
                 , Attr.style "align-items" "center"
                 , Attr.style "gap" "4px 8px"
@@ -157,6 +158,7 @@ header =
                     navLinks
                     ++ [ Html.a
                             [ Attr.href discordUrl
+                            , Attr.class "join-button"
                             , Attr.style "margin-left" "8px"
                             , Attr.style "padding" "10px 18px"
                             , Attr.style "border-radius" "999px"

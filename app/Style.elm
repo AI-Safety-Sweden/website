@@ -1,4 +1,4 @@
-module Style exposing (accent, background, border, borderButton, borderStrong, container, fontDisplay, surface, text, textFaint, textMuted, textStrong)
+module Style exposing (accent, background, border, borderStrong, container, fontDisplay, surface, textFaint, textMuted, textStrong)
 
 import Html
 import Html.Attributes as Attr
@@ -29,19 +29,9 @@ borderStrong =
     "#273150"
 
 
-borderButton : String
-borderButton =
-    "#3A4466"
-
-
 textStrong : String
 textStrong =
     "#F2F4F9"
-
-
-text : String
-text =
-    "#E9ECF4"
 
 
 textMuted : String

@@ -10,6 +10,8 @@ import Pages.PageUrl exposing (PageUrl)
 import Route exposing (Route)
 import SharedTemplate exposing (SharedTemplate)
 import Style
+import Svg
+import Svg.Attributes as SvgAttr
 import UrlPath exposing (UrlPath)
 import View exposing (View)
 
@@ -104,7 +106,8 @@ view _ _ _ _ pageView =
 
 header : Html msg
 header =
-    Html.header []
+    Html.header
+        [ Attr.style "border-bottom" ("1px solid " ++ Style.border) ]
         [ Html.nav
             (Style.container
                 ++ [ Attr.attribute "aria-label" "Main"
@@ -113,11 +116,12 @@ header =
                    , Attr.style "align-items" "center"
                    , Attr.style "justify-content" "space-between"
                    , Attr.style "gap" "12px"
-                   , Attr.style "padding-block" "20px"
+                   , Attr.style "padding-block" "8px"
                    ]
             )
             [ Html.a
                 [ Attr.href "#top"
+                , Attr.attribute "aria-label" siteName
                 , Attr.style "display" "flex"
                 , Attr.style "align-items" "center"
                 , Attr.style "gap" "10px"
@@ -129,22 +133,14 @@ header =
                 , Attr.style "font-weight" "700"
                 , Attr.style "letter-spacing" "-0.01em"
                 ]
-                [ Html.span
-                    [ Attr.attribute "aria-hidden" "true"
-                    , Attr.style "display" "block"
-                    , Attr.style "width" "12px"
-                    , Attr.style "height" "12px"
-                    , Attr.style "border-radius" "999px"
-                    , Attr.style "background" Style.accent
-                    ]
-                    []
-                , Html.span [] [ Html.text siteName ]
+                [ treeLogo
+                , Html.span [ Attr.class "site-title" ] [ Html.text siteName ]
                 ]
             , Html.div
                 [ Attr.style "display" "flex"
                 , Attr.style "flex-wrap" "wrap"
                 , Attr.style "gap" "4px 8px"
-                , Attr.style "font-size" "15px"
+                , Attr.style "font-size" "16px"
                 , Attr.style "font-weight" "500"
                 ]
                 (List.map
@@ -173,7 +169,7 @@ footer =
                    , Attr.style "justify-content" "space-between"
                    , Attr.style "align-items" "center"
                    , Attr.style "gap" "12px"
-                   , Attr.style "font-size" "15px"
+                   , Attr.style "font-size" "16px"
                    , Attr.style "color" Style.textFaint
                    ]
             )
@@ -195,9 +191,7 @@ footer =
 
 navLinks : List ( String, String )
 navLinks =
-    [ ( substackUrl, "Blog" )
-    , ( "#events", "Events" )
-    , ( "#contact", "Contact" )
+    [ ( "#contact", "Contact" )
     , ( "#about", "About Us" )
     ]
 
@@ -206,7 +200,6 @@ externalLinks : List ( String, String )
 externalLinks =
     [ ( substackUrl, "Substack" )
     , ( meetupGroupUrl, "Meetup" )
-    , ( lumaUrl, "Luma" )
     , ( discordUrl, "Discord" )
     ]
 
@@ -221,15 +214,65 @@ meetupGroupUrl =
     "https://www.meetup.com/stockholm-ai-safety/"
 
 
-{-| Placeholder until the group has a Luma page.
--}
-lumaUrl : String
-lumaUrl =
-    "#"
-
-
 {-| Placeholder until the group has a Discord invite link.
 -}
 discordUrl : String
 discordUrl =
     "#"
+
+
+treeLogo : Html msg
+treeLogo =
+    let
+        branch : Float -> Float -> Float -> Float -> Svg.Svg msg
+        branch x1 y1 x2 y2 =
+            Svg.line
+                [ SvgAttr.x1 (String.fromFloat x1)
+                , SvgAttr.y1 (String.fromFloat y1)
+                , SvgAttr.x2 (String.fromFloat x2)
+                , SvgAttr.y2 (String.fromFloat y2)
+                ]
+                []
+
+        node : Float -> Float -> Svg.Svg msg
+        node cx cy =
+            Svg.circle
+                [ SvgAttr.cx (String.fromFloat cx)
+                , SvgAttr.cy (String.fromFloat cy)
+                , SvgAttr.r "2.5"
+                ]
+                []
+    in
+    Svg.svg
+        [ SvgAttr.width "36"
+        , SvgAttr.height "36"
+        , SvgAttr.viewBox "-1 0 50 50"
+        , SvgAttr.stroke "#ffffff"
+        , Attr.attribute "aria-hidden" "true"
+        ]
+        [ Svg.g
+            [ SvgAttr.fill "none"
+            , SvgAttr.strokeWidth "2.6"
+            , SvgAttr.strokeLinecap "round"
+            ]
+            [ branch 24 8.6 24 48
+            , branch 24 16 16 21.6
+            , branch 24 16 32 21.6
+            , branch 24 25 12 33.4
+            , branch 24 25 36 33.4
+            , branch 24 34 8 45.2
+            , branch 24 34 40 45.2
+            ]
+        , Svg.g
+            [ SvgAttr.fill Style.background
+            , SvgAttr.strokeWidth "2.3"
+            ]
+            [ node 24 6
+            , node 16 21.6
+            , node 32 21.6
+            , node 12 33.4
+            , node 36 33.4
+            , node 8 45.2
+            , node 40 45.2
+            ]
+        ]

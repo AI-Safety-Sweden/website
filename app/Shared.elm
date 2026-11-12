@@ -139,6 +139,7 @@ header =
             , Html.div
                 [ Attr.style "display" "flex"
                 , Attr.style "flex-wrap" "wrap"
+                , Attr.style "align-items" "center"
                 , Attr.style "gap" "4px 8px"
                 , Attr.style "font-size" "16px"
                 , Attr.style "font-weight" "500"
@@ -147,12 +148,25 @@ header =
                     (\( href, label ) ->
                         Html.a
                             [ Attr.href href
+                            , Attr.class "nav-link"
                             , Attr.style "padding" "12px"
                             , Attr.style "text-decoration" "none"
                             ]
                             [ Html.text label ]
                     )
                     navLinks
+                    ++ [ Html.a
+                            [ Attr.href discordUrl
+                            , Attr.style "margin-left" "8px"
+                            , Attr.style "padding" "10px 18px"
+                            , Attr.style "border-radius" "999px"
+                            , Attr.style "background" Style.accent
+                            , Attr.style "color" Style.background
+                            , Attr.style "font-weight" "600"
+                            , Attr.style "text-decoration" "none"
+                            ]
+                            [ Html.text "Join Discord" ]
+                       ]
                 )
             ]
         ]

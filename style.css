@@ -13,4 +13,5 @@ a:hover { color: #FFFFFF; }
 /* Inline styles can't use media queries. */
 @media (max-width: 640px) {
   .site-title { display: none; }
+  .nav-link { padding-inline: 6px !important; }
 }

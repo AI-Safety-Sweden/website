@@ -51,7 +51,7 @@ textFaint =
 
 fontDisplay : String
 fontDisplay =
-    "'Source Serif 4', Georgia, serif"
+    "'Inter', system-ui, sans-serif"
 
 
 container : List (Html.Attribute msg)

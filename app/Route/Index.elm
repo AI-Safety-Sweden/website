@@ -212,7 +212,7 @@ hero nextEvent =
                 , Attr.style "font-weight" "700"
                 , Attr.style "font-size" "clamp(64px, 11vw, 168px)"
                 , Attr.style "line-height" "0.95"
-                , Attr.style "letter-spacing" "-0.02em"
+                , Attr.style "letter-spacing" "-0.04em"
                 , Attr.style "color" Style.textStrong
                 ]
                 [ Html.text "AI Safety"

@@ -226,6 +226,19 @@ hero nextEvent =
                 , Attr.style "line-height" "1.45"
                 ]
                 [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
+            , Html.a
+                [ Attr.href Shared.discordUrl
+                , Attr.style "display" "inline-block"
+                , Attr.style "margin-top" "28px"
+                , Attr.style "padding" "16px 32px"
+                , Attr.style "border-radius" "999px"
+                , Attr.style "background" Style.accent
+                , Attr.style "color" Style.background
+                , Attr.style "font-size" "18px"
+                , Attr.style "font-weight" "600"
+                , Attr.style "text-decoration" "none"
+                ]
+                [ Html.text "Join our Discord" ]
             ]
         , eventCard nextEvent
         ]

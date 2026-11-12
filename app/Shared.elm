@@ -1,4 +1,4 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), meetupGroupUrl, template)
+module Shared exposing (Data, Model, Msg(..), SharedMsg(..), discordUrl, meetupGroupUrl, template)
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)

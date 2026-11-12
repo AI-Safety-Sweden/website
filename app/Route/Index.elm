@@ -265,7 +265,7 @@ eventCard nextEvent =
             [ Html.p
                 [ Attr.style "margin" "0"
                 , Attr.style "font-family" Style.fontSans
-                , Attr.style "font-size" "13px"
+                , Attr.style "font-size" "15px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.1em"
                 , Attr.style "text-transform" "uppercase"
@@ -450,7 +450,7 @@ about =
                 [ Attr.style "flex" "1 1 220px"
                 , Attr.style "margin" "0"
                 , Attr.style "font-family" Style.fontSans
-                , Attr.style "font-size" "15px"
+                , Attr.style "font-size" "18px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.08em"
                 , Attr.style "text-transform" "uppercase"
@@ -508,7 +508,7 @@ groups =
                 [ Attr.style "flex" "1 1 220px"
                 , Attr.style "margin" "0"
                 , Attr.style "font-family" Style.fontSans
-                , Attr.style "font-size" "15px"
+                , Attr.style "font-size" "18px"
                 , Attr.style "font-weight" "600"
                 , Attr.style "letter-spacing" "0.08em"
                 , Attr.style "text-transform" "uppercase"

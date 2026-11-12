@@ -13,4 +13,7 @@ a:hover { color: #FFFFFF; }
 /* Inline styles can't use media queries. */
 @media (max-width: 640px) {
   .site-title { display: none; }
+  .nav-links { column-gap: 0 !important; }
+  .nav-link { padding-inline: 8px !important; }
+  .join-button { margin-left: 4px !important; padding-inline: 14px !important; }
 }

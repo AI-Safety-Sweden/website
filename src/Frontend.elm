@@ -15,11 +15,10 @@ import Html.Events
 import Id exposing (Id, SubmissionId)
 import Lamdera as LamderaCore
 import LoginForm
-import Postmark
 import SeqDict
 import Style
 import Submission exposing (Submission)
-import Types exposing (AdminData, FrontendModel, FrontendMsg(..), LoggedInModel, LoginType(..), Page(..), ToBackend(..), ToFrontend(..))
+import Types exposing (AdminData, FrontendModel, FrontendMsg(..), LoggedInModel, Page(..), ToBackend(..), ToFrontend(..))
 import Url exposing (Url)
 import UserTable
 
@@ -90,17 +89,16 @@ update msg model =
 
         LoginFormMsg loginFormMsg ->
             case model.page of
-                NotLoggedIn loginType loginForm ->
+                NotLoggedIn loginForm ->
                     let
                         ( loginForm2, cmd ) =
                             LoginForm.update
                                 (\email -> Lamdera.sendToBackend (GetLoginCodeRequest email))
                                 (\code -> Lamdera.sendToBackend (LoginWithCodeRequest code))
-                                (\password -> Lamdera.sendToBackend (LoginWithRecoveryPasswordRequest password))
                                 loginFormMsg
                                 loginForm
                     in
-                    ( { model | page = NotLoggedIn loginType loginForm2 }, Command.map identity LoginFormMsg cmd )
+                    ( { model | page = NotLoggedIn loginForm2 }, Command.map identity LoginFormMsg cmd )
 
                 CheckingLogin ->
                     ( model, Command.none )
@@ -179,18 +177,6 @@ update msg model =
         PressedCancelDeleteSubmission ->
             updateLoggedIn (\loggedIn -> ( { loggedIn | confirmDeleteSubmission = Nothing }, Command.none )) model
 
-        TypedPostmarkKey text ->
-            updateLoggedIn (\loggedIn -> ( { loggedIn | postmarkKeyInput = text }, Command.none )) model
-
-        PressedSavePostmarkKey ->
-            updateLoggedIn
-                (\loggedIn ->
-                    ( { loggedIn | postmarkKeyInput = "" }
-                    , Lamdera.sendToBackend (SetPostmarkKeyRequest (Postmark.apiKey (String.trim loggedIn.postmarkKeyInput)))
-                    )
-                )
-                model
-
 
 updateLoggedIn :
     (LoggedInModel -> ( LoggedInModel, Command FrontendOnly ToBackend FrontendMsg ))
@@ -208,15 +194,15 @@ updateLoggedIn func model =
         CheckingLogin ->
             ( model, Command.none )
 
-        NotLoggedIn _ _ ->
+        NotLoggedIn _ ->
             ( model, Command.none )
 
 
 updateLoginForm : (LoginForm.LoginForm -> LoginForm.LoginForm) -> FrontendModel -> FrontendModel
 updateLoginForm func model =
     case model.page of
-        NotLoggedIn loginType loginForm ->
-            { model | page = NotLoggedIn loginType (func loginForm) }
+        NotLoggedIn loginForm ->
+            { model | page = NotLoggedIn (func loginForm) }
 
         CheckingLogin ->
             model
@@ -231,12 +217,10 @@ loggedInPage data =
         { userId = data.userId
         , users = data.users
         , submissions = data.submissions
-        , postmarkKeySet = data.postmarkKeySet
         , userTable = UserTable.init
         , userTableError = Nothing
         , expandedSubmission = Nothing
         , confirmDeleteSubmission = Nothing
-        , postmarkKeyInput = ""
         }
 
 
@@ -246,21 +230,8 @@ updateFromBackend msg model =
         CheckLoginResponse (Ok data) ->
             ( { model | page = loggedInPage data }, Command.none )
 
-        CheckLoginResponse (Err loginType) ->
-            ( { model
-                | page =
-                    NotLoggedIn
-                        loginType
-                        (case loginType of
-                            LoginWithEmail ->
-                                LoginForm.initWithEmail
-
-                            LoginWithRecoveryPassword ->
-                                LoginForm.initWithRecoveryPassword
-                        )
-              }
-            , Command.none
-            )
+        CheckLoginResponse (Err ()) ->
+            ( { model | page = NotLoggedIn LoginForm.initWithEmail }, Command.none )
 
         GetLoginCodeRateLimited ->
             ( updateLoginForm LoginForm.rateLimited model, Command.none )
@@ -273,9 +244,6 @@ updateFromBackend msg model =
 
         LoginWithCodeResponse (Err code) ->
             ( updateLoginForm (LoginForm.invalidCode code) model, Command.none )
-
-        RecoveryPasswordInvalidResponse ->
-            ( updateLoginForm LoginForm.recoveryPasswordInvalid model, Command.none )
 
         LoggedOutResponse ->
             ( { model | page = CheckingLogin }, Lamdera.sendToBackend CheckLoginRequest )
@@ -296,9 +264,6 @@ updateFromBackend msg model =
                 (\loggedIn -> ( { loggedIn | submissions = SeqDict.remove submissionId loggedIn.submissions }, Command.none ))
                 model
 
-        PostmarkKeyChanged isSet ->
-            updateLoggedIn (\loggedIn -> ( { loggedIn | postmarkKeySet = isSet }, Command.none )) model
-
 
 view : FrontendModel -> Effect.Browser.Document FrontendMsg
 view model =
@@ -315,7 +280,7 @@ view model =
                 CheckingLogin ->
                     Html.p [ Attr.style "padding" "40px", Attr.style "color" Style.textFaint ] [ Html.text "Loading…" ]
 
-                NotLoggedIn _ loginForm ->
+                NotLoggedIn loginForm ->
                     LoginForm.view loginForm |> Html.map LoginFormMsg
 
                 LoggedIn loggedIn ->
@@ -349,16 +314,6 @@ loggedInView zone model =
                 , Style.smallButton PressedLogOut "Log out"
                 ]
             ]
-        , if model.postmarkKeySet then
-            Html.text ""
-
-          else
-            Html.p
-                [ Attr.style "padding" "12px 16px"
-                , Attr.style "background" "#F6EDC9"
-                , Attr.style "border-radius" "8px"
-                ]
-                [ Html.text "Login emails aren't set up. Add a Postmark API key below, and change the first user's email to your own, or nobody else will be able to log in." ]
         , section ("Signups (" ++ String.fromInt (SeqDict.size model.submissions) ++ ")") [ submissionsView zone model ]
         , section "Users"
             [ Html.p [ Attr.style "margin-top" "0", Attr.style "color" Style.textMuted ]
@@ -388,49 +343,6 @@ loggedInView zone model =
                                 Html.text ""
                        ]
                 )
-            ]
-        , section "Login emails"
-            [ Html.p [ Attr.style "margin-top" "0", Attr.style "color" Style.textMuted ]
-                [ Html.text
-                    (if model.postmarkKeySet then
-                        "A Postmark API key is set, so login codes are sent by email. Saving an empty key turns login emails off and the recovery password back on."
-
-                     else
-                        "No Postmark API key is set yet."
-                    )
-                ]
-            , Html.form
-                [ Html.Events.onSubmit PressedSavePostmarkKey
-                , Attr.style "display" "flex"
-                , Attr.style "flex-wrap" "wrap"
-                , Attr.style "gap" "12px"
-                ]
-                [ Html.input
-                    [ Attr.type_ "password"
-                    , Attr.value model.postmarkKeyInput
-                    , Attr.placeholder "Postmark server API token"
-                    , Attr.attribute "aria-label" "Postmark server API token"
-                    , Html.Events.onInput TypedPostmarkKey
-                    , Attr.style "flex" "1 1 280px"
-                    , Attr.style "padding" "8px 10px"
-                    , Attr.style "font" "inherit"
-                    , Attr.style "border" ("1px solid " ++ Style.borderStrong)
-                    , Attr.style "border-radius" "8px"
-                    ]
-                    []
-                , Html.button
-                    [ Attr.type_ "submit"
-                    , Attr.style "padding" "8px 16px"
-                    , Attr.style "border" "none"
-                    , Attr.style "border-radius" "8px"
-                    , Attr.style "background" Style.accent
-                    , Attr.style "color" Style.background
-                    , Attr.style "font" "inherit"
-                    , Attr.style "font-weight" "600"
-                    , Attr.style "cursor" "pointer"
-                    ]
-                    [ Html.text "Save key" ]
-                ]
             ]
         ]
 

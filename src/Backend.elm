@@ -19,9 +19,8 @@ import Postmark
 import Quantity
 import SecretId
 import SeqDict exposing (SeqDict)
-import Sha256
 import String.Nonempty exposing (NonemptyString(..))
-import Types exposing (AdminData, BackendModel, BackendMsg(..), LoginType(..), ToBackend(..), ToFrontend(..))
+import Types exposing (AdminData, BackendModel, BackendMsg(..), ToBackend(..), ToFrontend(..))
 import User exposing (User)
 import UserTable
 
@@ -50,44 +49,34 @@ app_ =
     }
 
 
-{-| The first user. Log in as them with the recovery password, then change the email to your own
-in the user table.
+{-| `Env.adminEmail` can always log in. If they aren't in the user table (it's empty when the app
+first starts, or someone deleted them), they get added back when they ask for a login code.
 -}
-initialUsers : SeqDict (Id UserId) User
-initialUsers =
-    case EmailAddress.fromString "a@a.aa" of
+withAdminUser : Time.Posix -> SeqDict (Id UserId) User -> SeqDict (Id UserId) User
+withAdminUser time users =
+    case EmailAddress.fromString Env.adminEmail of
         Just email ->
-            SeqDict.singleton (Id.fromInt 0) { name = "Admin", email = email, createdAt = Time.millisToPosix 0 }
+            case findUserByEmail email users of
+                Just _ ->
+                    users
+
+                Nothing ->
+                    SeqDict.insert
+                        (SeqDict.keys users |> List.map Id.toInt |> List.maximum |> Maybe.withDefault -1 |> (+) 1 |> Id.fromInt)
+                        { name = "Admin", email = email, createdAt = time }
+                        users
 
         Nothing ->
-            SeqDict.empty
-
-
-{-| Sha256 hash of the password that logs you in as the first user while there's no Postmark API
-key (so no login emails can be sent). It's the same as at-chat's.
--}
-recoveryPasswordHash : String
-recoveryPasswordHash =
-    "0e6a28a18a696783861f4eda27b09caa96718799deb31d701321cb3a9530d913"
-
-
-loginType : BackendModel -> LoginType
-loginType model =
-    if model.postmarkApiKey == Postmark.apiKey "" then
-        LoginWithRecoveryPassword
-
-    else
-        LoginWithEmail
+            users
 
 
 init : ( BackendModel, Command BackendOnly ToFrontend BackendMsg )
 init =
-    ( { users = initialUsers
+    ( { users = SeqDict.empty
       , recentLoginEmails = SeqDict.empty
       , sessions = SeqDict.empty
       , pendingLogins = SeqDict.empty
       , submissions = SeqDict.empty
-      , postmarkApiKey = Postmark.apiKey ""
       , secretCounter = 0
       , serverSecret = SecretId.fromString Env.secretKey
       }
@@ -128,14 +117,19 @@ updateFromFrontendWithTime time sessionId clientId msg model =
                     Ok (adminData userId model)
 
                 Nothing ->
-                    Err (loginType model)
+                    Err ()
               )
                 |> CheckLoginResponse
                 |> Lamdera.sendToFrontend clientId
             )
 
         GetLoginCodeRequest email ->
-            case findUserByEmail email model.users of
+            let
+                users : SeqDict (Id UserId) User
+                users =
+                    withAdminUser time model.users
+            in
+            case findUserByEmail email users of
                 Just ( userId, _ ) ->
                     let
                         recentLogins : List Time.Posix
@@ -148,7 +142,7 @@ updateFromFrontendWithTime time sessionId clientId msg model =
                     else
                         let
                             ( model2, loginCode ) =
-                                getLoginCode time model
+                                getLoginCode time { model | users = users }
                         in
                         ( { model2
                             | pendingLogins =
@@ -159,7 +153,7 @@ updateFromFrontendWithTime time sessionId clientId msg model =
                             , recentLoginEmails =
                                 SeqDict.insert userId (time :: List.take 20 recentLogins) model2.recentLoginEmails
                           }
-                        , sendLoginEmail email loginCode model2.postmarkApiKey
+                        , sendLoginEmail email loginCode
                         )
 
                 Nothing ->
@@ -192,18 +186,6 @@ updateFromFrontendWithTime time sessionId clientId msg model =
 
                 Nothing ->
                     ( model, Lamdera.sendToFrontend clientId (LoginWithCodeResponse (Err loginCode)) )
-
-        LoginWithRecoveryPasswordRequest password ->
-            case ( loginType model, SeqDict.keys model.users |> List.head ) of
-                ( LoginWithRecoveryPassword, Just userId ) ->
-                    if Sha256.sha256 password == recoveryPasswordHash then
-                        logIn sessionId userId model
-
-                    else
-                        ( model, Lamdera.sendToFrontend clientId RecoveryPasswordInvalidResponse )
-
-                _ ->
-                    ( model, Lamdera.sendToFrontend clientId RecoveryPasswordInvalidResponse )
 
         LogOutRequest ->
             ( { model | sessions = SeqDict.remove sessionId model.sessions }
@@ -257,19 +239,6 @@ updateFromFrontendWithTime time sessionId clientId msg model =
                     ( model2, toLoggedInSessions model2 (SubmissionDeleted submissionId) )
                 )
 
-        SetPostmarkKeyRequest apiKey ->
-            asUser
-                sessionId
-                model
-                (\_ ->
-                    let
-                        model2 : BackendModel
-                        model2 =
-                            { model | postmarkApiKey = apiKey }
-                    in
-                    ( model2, toLoggedInSessions model2 (PostmarkKeyChanged (loginType model2 == LoginWithEmail)) )
-                )
-
 
 asUser :
     SessionId
@@ -305,7 +274,6 @@ adminData userId model =
     { userId = userId
     , users = model.users
     , submissions = model.submissions
-    , postmarkKeySet = loginType model == LoginWithEmail
     }
 
 
@@ -360,8 +328,8 @@ noReplyEmailAddress =
     EmailAddress.fromString "no-reply@aisafetysweden.se"
 
 
-sendLoginEmail : EmailAddress -> Int -> Postmark.ApiKey -> Command BackendOnly ToFrontend BackendMsg
-sendLoginEmail emailAddress loginCode apiKey =
+sendLoginEmail : EmailAddress -> Int -> Command BackendOnly ToFrontend BackendMsg
+sendLoginEmail emailAddress loginCode =
     let
         loginCode2 : String
         loginCode2 =
@@ -396,7 +364,7 @@ sendLoginEmail emailAddress loginCode apiKey =
                     ("Here is your login code " ++ loginCode2 ++ "\n\nIf you weren't expecting this email you can safely ignore it.")
             , messageStream = "outbound"
             }
-                |> Postmark.sendEmail SentLoginEmail apiKey
+                |> Postmark.sendEmail SentLoginEmail (Postmark.apiKey Env.postmarkApiKey)
 
         Nothing ->
             Command.none

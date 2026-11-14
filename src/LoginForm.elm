@@ -3,12 +3,10 @@ module LoginForm exposing
     , Msg
     , emailNotAllowed
     , initWithEmail
-    , initWithRecoveryPassword
     , invalidCode
     , loginCodeLength
     , maxLoginAttempts
     , rateLimited
-    , recoveryPasswordInvalid
     , update
     , view
     )
@@ -28,7 +26,6 @@ import Style
 type LoginForm
     = EnterEmail EnterEmail2
     | EnterLoginCode EnterLoginCode2
-    | EnterRecoveryPassword EnterRecoveryPassword2
 
 
 type alias EnterEmail2 =
@@ -51,20 +48,11 @@ type alias EnterLoginCode2 =
     }
 
 
-type alias EnterRecoveryPassword2 =
-    { password : String
-    , checking : Bool
-    , invalid : Bool
-    }
-
-
 type Msg
     = TypedEmail String
     | PressedSubmitEmail
     | TypedLoginCode String
     | PressedCancelLogin
-    | TypedRecoveryPassword String
-    | PressedSubmitRecoveryPassword
 
 
 loginCodeLength : number
@@ -82,19 +70,13 @@ initWithEmail =
     EnterEmail { email = "", pressedSubmit = False, problem = Nothing }
 
 
-initWithRecoveryPassword : LoginForm
-initWithRecoveryPassword =
-    EnterRecoveryPassword { password = "", checking = False, invalid = False }
-
-
 update :
     (EmailAddress -> Command FrontendOnly toBackend Msg)
     -> (Int -> Command FrontendOnly toBackend Msg)
-    -> (String -> Command FrontendOnly toBackend Msg)
     -> Msg
     -> LoginForm
     -> ( LoginForm, Command FrontendOnly toBackend Msg )
-update onSubmitEmail onSubmitLoginCode onSubmitRecoveryPassword msg model =
+update onSubmitEmail onSubmitLoginCode msg model =
     case msg of
         TypedEmail text ->
             case model of
@@ -144,22 +126,6 @@ update onSubmitEmail onSubmitLoginCode onSubmitRecoveryPassword msg model =
         PressedCancelLogin ->
             ( initWithEmail, Command.none )
 
-        TypedRecoveryPassword text ->
-            case model of
-                EnterRecoveryPassword form ->
-                    ( EnterRecoveryPassword { form | password = text, invalid = False }, Command.none )
-
-                _ ->
-                    ( model, Command.none )
-
-        PressedSubmitRecoveryPassword ->
-            case model of
-                EnterRecoveryPassword form ->
-                    ( EnterRecoveryPassword { form | checking = True }, onSubmitRecoveryPassword form.password )
-
-                _ ->
-                    ( model, Command.none )
-
 
 rateLimited : LoginForm -> LoginForm
 rateLimited model =
@@ -195,16 +161,6 @@ invalidCode code model =
                         else
                             form.checking
                 }
-
-        _ ->
-            model
-
-
-recoveryPasswordInvalid : LoginForm -> LoginForm
-recoveryPasswordInvalid model =
-    case model of
-        EnterRecoveryPassword form ->
-            EnterRecoveryPassword { form | checking = False, invalid = True }
 
         _ ->
             model
@@ -275,33 +231,6 @@ view model =
                         Nothing ->
                             Html.text ""
                     , Html.div [ Attr.style "margin-top" "16px" ] [ Style.smallButton PressedCancelLogin "Use a different email" ]
-                    ]
-
-            EnterRecoveryPassword form ->
-                Html.form
-                    [ Html.Events.onSubmit PressedSubmitRecoveryPassword ]
-                    [ Html.p [] [ Html.text "Login emails aren't set up yet, so log in with the recovery password, then add a Postmark API key." ]
-                    , label "login_password" "Recovery password"
-                    , Html.input
-                        (Attr.id "login_password"
-                            :: Attr.type_ "password"
-                            :: Attr.value form.password
-                            :: Html.Events.onInput TypedRecoveryPassword
-                            :: inputStyle
-                        )
-                        []
-                    , if form.invalid then
-                        errorText "Wrong password"
-
-                      else
-                        Html.text ""
-                    , Html.div [ Attr.style "margin-top" "16px" ]
-                        [ if form.checking then
-                            Html.p [ Attr.style "color" Style.textFaint ] [ Html.text "Checking…" ]
-
-                          else
-                            submitButton "Log in"
-                        ]
                     ]
         ]
 

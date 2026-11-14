@@ -34,19 +34,17 @@ shared secret, which must match `Env.signupSecret` here and `SIGNUP_SECRET` on N
 ### Logging in
 
 Only email addresses in the user table can log in. They get an 8-digit code by email, sent with
-Postmark. Until a Postmark API key has been saved on the admin page, no emails can be sent, so the
-first user logs in with the recovery password instead (the same one as at-chat's). After that, change
-the first user's email (`a@a.aa`) to your own and add a Postmark key. Once a key is set, the
-recovery password stops working.
-
-Login emails come from `no-reply@aisafetysweden.se`, so that address (or the domain) needs to be a
-verified sender in Postmark.
+Postmark. `Env.adminEmail` can always log in: if it isn't in the user table (it's empty on first
+start), it gets added when that address asks for a code. Login emails come from
+`no-reply@aisafetysweden.se`, so that address (or the domain) needs to be a verified sender in Postmark.
 
 ### Environment variables (Lamdera dashboard)
 
 - `isProduction_`: `True`
 - `secretKey`: a long random string, used to generate login codes
 - `signupSecret`: a long random string, the same as `SIGNUP_SECRET` on Netlify
+- `adminEmail`: the email address that can always log in
+- `postmarkApiKey`: the Postmark server API token for sending login codes
 
 ### Building
 

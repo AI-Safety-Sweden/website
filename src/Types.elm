@@ -5,7 +5,6 @@ module Types exposing
     , FrontendModel
     , FrontendMsg(..)
     , LoggedInModel
-    , LoginType(..)
     , Page(..)
     , PendingLogin
     , ToBackend(..)
@@ -38,7 +37,7 @@ type alias FrontendModel =
 
 type Page
     = CheckingLogin
-    | NotLoggedIn LoginType LoginForm
+    | NotLoggedIn LoginForm
     | LoggedIn LoggedInModel
 
 
@@ -46,28 +45,17 @@ type alias LoggedInModel =
     { userId : Id UserId
     , users : SeqDict (Id UserId) User
     , submissions : SeqDict (Id SubmissionId) Submission
-    , postmarkKeySet : Bool
     , userTable : UserTable
     , userTableError : Maybe UsersChangeError
     , expandedSubmission : Maybe (Id SubmissionId)
     , confirmDeleteSubmission : Maybe (Id SubmissionId)
-    , postmarkKeyInput : String
     }
-
-
-{-| Logging in normally means typing in a code sent by email. Until a Postmark API key has been
-set, no emails can be sent, so the first user logs in with the recovery password instead.
--}
-type LoginType
-    = LoginWithEmail
-    | LoginWithRecoveryPassword
 
 
 type alias AdminData =
     { userId : Id UserId
     , users : SeqDict (Id UserId) User
     , submissions : SeqDict (Id SubmissionId) Submission
-    , postmarkKeySet : Bool
     }
 
 
@@ -77,7 +65,6 @@ type alias BackendModel =
     , sessions : SeqDict SessionId (Id UserId)
     , pendingLogins : SeqDict SessionId PendingLogin
     , submissions : SeqDict (Id SubmissionId) Submission
-    , postmarkApiKey : Postmark.ApiKey
     , secretCounter : Int
     , serverSecret : SecretId ServerSecret
     }
@@ -104,19 +91,15 @@ type FrontendMsg
     | PressedDeleteSubmission (Id SubmissionId)
     | PressedConfirmDeleteSubmission (Id SubmissionId)
     | PressedCancelDeleteSubmission
-    | TypedPostmarkKey String
-    | PressedSavePostmarkKey
 
 
 type ToBackend
     = CheckLoginRequest
     | GetLoginCodeRequest EmailAddress
     | LoginWithCodeRequest Int
-    | LoginWithRecoveryPasswordRequest String
     | LogOutRequest
     | ChangeUsersRequest UserChanges
     | DeleteSubmissionRequest (Id SubmissionId)
-    | SetPostmarkKeyRequest Postmark.ApiKey
 
 
 type BackendMsg
@@ -126,14 +109,12 @@ type BackendMsg
 
 
 type ToFrontend
-    = CheckLoginResponse (Result LoginType AdminData)
+    = CheckLoginResponse (Result () AdminData)
     | GetLoginCodeRateLimited
     | EmailNotAllowedResponse
     | LoginWithCodeResponse (Result Int AdminData)
-    | RecoveryPasswordInvalidResponse
     | LoggedOutResponse
     | UsersChanged (SeqDict (Id UserId) User)
     | ChangeUsersRejected UsersChangeError
     | SubmissionAdded (Id SubmissionId) Submission
     | SubmissionDeleted (Id SubmissionId)
-    | PostmarkKeyChanged Bool

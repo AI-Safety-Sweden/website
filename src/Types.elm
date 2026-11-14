@@ -87,6 +87,7 @@ type FrontendMsg
     | PressedLogOut
     | UserTableMsg UserTable.Msg
     | PressedSaveUserChanges
+    | PressedExportSignups
     | PressedSubmission (Id SubmissionId)
     | PressedDeleteSubmission (Id SubmissionId)
     | PressedConfirmDeleteSubmission (Id SubmissionId)

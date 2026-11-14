@@ -42,7 +42,8 @@ export default async (request) => {
 
   const answers = {};
   for (const [name, value] of form.entries()) {
-    if (name === "website" || typeof value !== "string" || value.trim() === "") {
+    // Every submission has accepted the privacy checkbox, so it isn't worth sending.
+    if (name === "website" || name === "privacy" || typeof value !== "string" || value.trim() === "") {
       continue;
     }
     if (multipleChoice.has(name)) {

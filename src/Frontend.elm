@@ -5,6 +5,7 @@ import Browser.Navigation
 import Effect.Browser
 import Effect.Browser.Navigation as Navigation exposing (Key)
 import Effect.Command as Command exposing (Command, FrontendOnly)
+import Effect.File.Download
 import Effect.Lamdera as Lamdera
 import Effect.Subscription as Subscription
 import Effect.Task as Task
@@ -13,6 +14,7 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events
 import Id exposing (Id, SubmissionId)
+import Json.Encode
 import Lamdera as LamderaCore
 import LoginForm
 import SeqDict
@@ -144,6 +146,23 @@ update msg model =
                             ( { loggedIn | userTable = userTable, userTableError = Just error }, Command.none )
                 )
                 model
+
+        PressedExportSignups ->
+            case model.page of
+                LoggedIn loggedIn ->
+                    ( model
+                    , SeqDict.values loggedIn.submissions
+                        |> List.sortBy (\submission -> Time.posixToMillis submission.submittedAt)
+                        |> Json.Encode.list Submission.encodeReadable
+                        |> Json.Encode.encode 2
+                        |> Effect.File.Download.string ("signups-" ++ Style.date model.zone model.time ++ ".json") "application/json"
+                    )
+
+                CheckingLogin ->
+                    ( model, Command.none )
+
+                NotLoggedIn _ ->
+                    ( model, Command.none )
 
         PressedSubmission submissionId ->
             updateLoggedIn
@@ -314,7 +333,14 @@ loggedInView zone model =
                 , Style.smallButton PressedLogOut "Log out"
                 ]
             ]
-        , section ("Signups (" ++ String.fromInt (SeqDict.size model.submissions) ++ ")") [ submissionsView zone model ]
+        , section ("Signups (" ++ String.fromInt (SeqDict.size model.submissions) ++ ")")
+            [ if SeqDict.isEmpty model.submissions then
+                Html.text ""
+
+              else
+                Html.div [ Attr.style "margin-bottom" "12px" ] [ Style.smallButton PressedExportSignups "Export as JSON" ]
+            , submissionsView zone model
+            ]
         , section "Users"
             [ Html.p [ Attr.style "margin-top" "0", Attr.style "color" Style.textMuted ]
                 [ Html.text "Only these people can log in. Click a cell to edit it." ]

@@ -1,4 +1,4 @@
-module Submission exposing (Answer(..), Submission, answerText, decoder, field, questionLabel)
+module Submission exposing (Answer(..), Submission, answerText, decoder, encodeReadable, field, questionLabel)
 
 {-| A signup from the form at aisafetysweden.se/join. The website's Netlify function
 (netlify/functions/join.mjs in the website repo) sends it here as JSON:
@@ -9,6 +9,7 @@ module Submission exposing (Answer(..), Submission, answerText, decoder, field, 
 
 import Iso8601
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode
 import Time
 
 
@@ -36,7 +37,7 @@ decoder =
                     , Decode.map ListAnswer (Decode.list Decode.string)
                     ]
                 )
-                |> Decode.map orderAnswers
+                |> Decode.map (\answers -> List.filter (\( name, _ ) -> name /= "privacy") answers |> orderAnswers)
             )
         )
 
@@ -75,6 +76,27 @@ field name submission =
 
         [] ->
             ""
+
+
+{-| For the export. Uses the question labels and option labels the admin page shows, rather than the
+form's field names and values.
+-}
+encodeReadable : Submission -> Json.Encode.Value
+encodeReadable submission =
+    ( "Submitted", Json.Encode.string (Iso8601.fromTime submission.submittedAt) )
+        :: List.map
+            (\( name, answer ) ->
+                ( questionLabel name
+                , case answer of
+                    TextAnswer _ ->
+                        Json.Encode.string (answerText name answer)
+
+                    ListAnswer values ->
+                        Json.Encode.list (\value -> Json.Encode.string (answerText name (TextAnswer value))) values
+                )
+            )
+            submission.answers
+        |> Json.Encode.object
 
 
 questionLabel : String -> String
@@ -221,5 +243,4 @@ questions =
       }
     , { name = "experience", label = "Relevant experience", options = [] }
     , { name = "anything_else", label = "Anything else", options = [] }
-    , { name = "privacy", label = "Privacy consent", options = [ ( "accepted", "Accepted" ) ] }
     ]

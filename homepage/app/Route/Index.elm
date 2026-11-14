@@ -19,6 +19,7 @@ import Shared
 import Style
 import Svg
 import Svg.Attributes as SvgAttr
+import Url
 import UrlPath exposing (UrlPath)
 import View exposing (View)
 
@@ -527,27 +528,96 @@ groups =
                 ++ [ Attr.style "padding-block" "clamp(56px, 10vw, 72px)"
                    , Attr.style "display" "flex"
                    , Attr.style "flex-wrap" "wrap"
-                   , Attr.style "gap" "32px 80px"
+                   , Attr.style "align-items" "center"
+                   , Attr.style "gap" "40px 80px"
                    ]
             )
-            [ Html.h2
+            [ Html.div
                 [ Attr.style "flex" "1 1 220px"
-                , Attr.style "margin" "0"
-                , Attr.style "font-family" Style.fontSans
-                , Attr.style "font-size" "18px"
-                , Attr.style "font-weight" "600"
-                , Attr.style "letter-spacing" "0.08em"
-                , Attr.style "text-transform" "uppercase"
-                , Attr.style "color" Style.accent
-                ]
-                [ Html.text "Where we are" ]
-            , Html.div
-                [ Attr.style "flex" "999 1 560px"
-                , Attr.style "min-width" "0"
+                , Attr.style "display" "flex"
+                , Attr.style "justify-content" "center"
                 ]
                 [ groupsMap ]
+            , Html.div
+                [ Attr.style "flex" "999 1 480px"
+                , Attr.style "min-width" "0"
+                , Attr.style "max-width" "760px"
+                ]
+                [ Html.h2
+                    [ Attr.style "margin" "0"
+                    , Attr.style "font-family" Style.fontDisplay
+                    , Attr.style "font-size" "clamp(32px, 6vw, 48px)"
+                    , Attr.style "font-weight" "700"
+                    , Attr.style "letter-spacing" "-0.02em"
+                    , Attr.style "line-height" "1.1"
+                    , Attr.style "color" Style.textStrong
+                    ]
+                    [ Html.text "Find your local group" ]
+                , Html.ul
+                    [ Attr.style "list-style" "none"
+                    , Attr.style "margin" "28px 0 0"
+                    , Attr.style "padding" "0"
+                    , Attr.style "display" "grid"
+                    , Attr.style "grid-template-columns" "repeat(auto-fill, minmax(170px, 1fr))"
+                    , Attr.style "gap" "12px"
+                    ]
+                    (List.map
+                        (\city ->
+                            Html.li []
+                                [ Html.a
+                                    [ Attr.href (Shared.joinUrl ++ "?city=" ++ Url.percentEncode city)
+                                    , Attr.style "display" "flex"
+                                    , Attr.style "align-items" "center"
+                                    , Attr.style "gap" "12px"
+                                    , Attr.style "padding" "16px 20px"
+                                    , Attr.style "border" ("1px solid " ++ Style.borderStrong)
+                                    , Attr.style "border-radius" "10px"
+                                    , Attr.style "background" Style.surface
+                                    , Attr.style "color" Style.textStrong
+                                    , Attr.style "font-size" "18px"
+                                    , Attr.style "font-weight" "600"
+                                    , Attr.style "text-decoration" "none"
+                                    ]
+                                    [ Html.span
+                                        [ Attr.style "width" "10px"
+                                        , Attr.style "height" "10px"
+                                        , Attr.style "flex" "none"
+                                        , Attr.style "border-radius" "50%"
+                                        , Attr.style "background" Style.accent
+                                        , Attr.attribute "aria-hidden" "true"
+                                        ]
+                                        []
+                                    , Html.text city
+                                    ]
+                                ]
+                        )
+                        groupCities
+                    )
+                , Html.p
+                    [ Attr.style "margin" "28px 0 0"
+                    , Attr.style "font-size" "18px"
+                    , Attr.style "line-height" "1.6"
+                    , Attr.style "color" Style.textMuted
+                    ]
+                    [ Html.text "No group in your city yet? "
+                    , Html.a
+                        [ Attr.href Shared.joinUrl
+                        , Attr.style "color" Style.accent
+                        , Attr.style "font-weight" "600"
+                        ]
+                        [ Html.text "Sign up and we'll help you start one →" ]
+                    ]
+                ]
             ]
         ]
+
+
+{-| The cities with a group, in the order they're listed next to the map. Each links to the signup
+form with its city filled in.
+-}
+groupCities : List String
+groupCities =
+    [ "Stockholm", "Uppsala", "Örebro", "Linköping", "Lund/Malmö" ]
 
 
 type LabelSide

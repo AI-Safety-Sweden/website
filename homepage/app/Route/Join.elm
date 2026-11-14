@@ -9,6 +9,7 @@ import Head.Seo as Seo
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events
+import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import PagesMsg exposing (PagesMsg)
 import RouteBuilder exposing (App, StatefulRoute)
@@ -20,7 +21,8 @@ import View exposing (View)
 
 
 type alias Model =
-    { involvement : Maybe Involvement
+    { city : String
+    , involvement : Maybe Involvement
     , checked : Dict String (Set String)
     }
 
@@ -32,7 +34,8 @@ type Involvement
 
 
 type Msg
-    = SelectedInvolvement Involvement
+    = TypedCity String
+    | SelectedInvolvement Involvement
     | ToggledCheckbox String String Bool
 
 
@@ -68,13 +71,33 @@ data =
 
 
 init : App Data ActionData RouteParams -> Shared.Model -> ( Model, Effect Msg )
-init _ _ =
-    ( { involvement = Nothing, checked = Dict.empty }, Effect.none )
+init app _ =
+    ( { city = cityFromUrl app.url, involvement = Nothing, checked = Dict.empty }, Effect.none )
+
+
+{-| The homepage's "Find your local group" links here with ?city=<city> to fill in the city question.
+-}
+cityFromUrl : Maybe PageUrl -> String
+cityFromUrl maybeUrl =
+    case maybeUrl of
+        Just url ->
+            case Dict.get "city" url.query of
+                Just (city :: _) ->
+                    city
+
+                _ ->
+                    ""
+
+        Nothing ->
+            ""
 
 
 update : App Data ActionData RouteParams -> Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
 update _ _ msg model =
     case msg of
+        TypedCity city ->
+            ( { model | city = city }, Effect.none )
+
         SelectedInvolvement involvement ->
             ( { model | involvement = Just involvement }, Effect.none )
 
@@ -166,7 +189,12 @@ page model =
                 , Attr.style "gap" "48px"
                 ]
                 (List.concat
-                    [ [ formSection "About you" "" (List.map (questionView model.checked) aboutYou)
+                    [ [ formSection "About you"
+                            ""
+                            (List.map (questionView model.checked) aboutYou
+                                ++ cityView model.city
+                                :: List.map (questionView model.checked) aboutYou2
+                            )
                       , formSection "Your interests"
                             ""
                             (List.map (questionView model.checked) interests ++ [ involvementView ])
@@ -264,8 +292,12 @@ aboutYou =
       , required = Optional
       , kind = ShortText
       }
-    , { name = "city", label = "City you currently live in", help = "", required = Required, kind = ShortText }
-    , { name = "career"
+    ]
+
+
+aboutYou2 : List Question
+aboutYou2 =
+    [ { name = "career"
       , label = "What stage of your career are you at?"
       , help = ""
       , required = Required
@@ -332,6 +364,24 @@ interests =
                 ]
       }
     ]
+
+
+cityView : String -> Html Msg
+cityView city =
+    textQuestion
+        { name = "city", label = "City you currently live in", help = "", required = Required, kind = ShortText }
+        (Html.input
+            (Attr.type_ "text"
+                :: Attr.id "city"
+                :: Attr.name "city"
+                :: Attr.required True
+                :: Attr.maxlength 300
+                :: Attr.value city
+                :: Html.Events.onInput TypedCity
+                :: inputStyle
+            )
+            []
+        )
 
 
 involvementChoices : List ( Involvement, Choice )

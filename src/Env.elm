@@ -33,7 +33,7 @@ signupSecret =
 -}
 adminEmail : String
 adminEmail =
-    "admin@example.com"
+    "a@a.aa"
 
 
 {-| The Postmark server API token used to send login codes. Without it no login emails get sent

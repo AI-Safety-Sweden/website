@@ -155,9 +155,7 @@ page model =
                 [ Html.p [ Attr.style "margin" "0" ]
                     [ Html.text "AI Safety Sweden is a community of researchers, professionals and students in Sweden who are interested in, or already working on, AI safety, interpretability, evaluation, alignment and AI governance. The community organizes seminars, events, mentorship programmes, and teaching and outreach activities." ]
                 , Html.p [ Attr.style "margin" "0" ]
-                    [ Html.text "This form helps us get to know who you are and what interests you, understand how you'd like to take part (as a member or by helping organize the community), and, if you want to contribute, learn which working groups you'd like to join." ]
-                , Html.p [ Attr.style "margin" "0" ]
-                    [ Html.text "It takes about 5–10 minutes if you just want to join as a member, or 10–15 minutes if you also want to help organize." ]
+                    [ Html.text "An email will be sent to you with a link to our Discord once we get your form." ]
                 ]
             , Html.form
                 [ Attr.method "post"

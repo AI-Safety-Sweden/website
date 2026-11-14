@@ -1,4 +1,6 @@
 node_modules/
 elm-stuff/
-/dist/
+/homepage/dist/
 .elm-pages/
+__pycache__/
+.claude/settings.local.json

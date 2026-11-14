@@ -2,8 +2,8 @@
 // that stores it, with a shared secret so the Lamdera app only accepts submissions from here.
 //
 // Netlify environment variables:
-//   SIGNUP_FORWARD_URL  the Lamdera endpoint, e.g. https://example.lamdera.app/_r/signup
-//   SIGNUP_SECRET       a long random string, also known to the Lamdera app
+//   SIGNUP_FORWARD_URL  the Lamdera endpoint, https://ai-safety-sweden.lamdera.app/_r/signup
+//   SIGNUP_SECRET       a long random string, the same as signupSecret in the Lamdera app (AI-Safety-Sweden/admin-site)
 //
 // The JSON sent is:
 //   { "secret": "...", "submittedAt": "2026-11-14T13:00:00.000Z", "answers": { "first_name": "Ada", "areas": ["interp", "other"], ... } }

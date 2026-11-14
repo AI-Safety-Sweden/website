@@ -7,6 +7,7 @@ module Types exposing
     , LoggedInModel
     , Page(..)
     , PendingLogin
+    , SignupNotifications
     , ToBackend(..)
     , ToFrontend(..)
     )
@@ -47,6 +48,7 @@ type alias LoggedInModel =
     , submissions : SeqDict (Id SubmissionId) Submission
     , userTable : UserTable
     , userTableError : Maybe UsersChangeError
+    , notifyOnSignup : Bool
     , expandedSubmission : Maybe (Id SubmissionId)
     , confirmDeleteSubmission : Maybe (Id SubmissionId)
     }
@@ -56,6 +58,7 @@ type alias AdminData =
     { userId : Id UserId
     , users : SeqDict (Id UserId) User
     , submissions : SeqDict (Id SubmissionId) Submission
+    , notifyOnSignup : Bool
     }
 
 
@@ -65,8 +68,18 @@ type alias BackendModel =
     , sessions : SeqDict SessionId (Id UserId)
     , pendingLogins : SeqDict SessionId PendingLogin
     , submissions : SeqDict (Id SubmissionId) Submission
+    , signupNotifications : SeqDict (Id UserId) SignupNotifications
     , secretCounter : Int
     , serverSecret : SecretId ServerSecret
+    }
+
+
+{-| Users in this dict get emailed about new signups. The first signup is emailed straight away,
+then any others wait until an hour after the last email, and are sent together.
+-}
+type alias SignupNotifications =
+    { lastSentAt : Maybe Time.Posix
+    , pending : List (Id SubmissionId)
     }
 
 
@@ -88,6 +101,7 @@ type FrontendMsg
     | UserTableMsg UserTable.Msg
     | PressedSaveUserChanges
     | PressedExportSignups
+    | ToggledNotifyOnSignup Bool
     | PressedSubmission (Id SubmissionId)
     | PressedDeleteSubmission (Id SubmissionId)
     | PressedConfirmDeleteSubmission (Id SubmissionId)
@@ -101,12 +115,16 @@ type ToBackend
     | LogOutRequest
     | ChangeUsersRequest UserChanges
     | DeleteSubmissionRequest (Id SubmissionId)
+    | SetNotifyOnSignupRequest Bool
 
 
 type BackendMsg
     = GotTimeForUpdateFromFrontend SessionId ClientId ToBackend Time.Posix
     | SentLoginEmail (Result Postmark.SendEmailError ())
     | SubmissionReceived (Id SubmissionId)
+    | GotTimeForSubmission (Id SubmissionId) Time.Posix
+    | CheckSignupNotifications Time.Posix
+    | SentSignupNotification (Result Postmark.SendEmailError ())
 
 
 type ToFrontend
@@ -119,3 +137,4 @@ type ToFrontend
     | ChangeUsersRejected UsersChangeError
     | SubmissionAdded (Id SubmissionId) Submission
     | SubmissionDeleted (Id SubmissionId)
+    | NotifyOnSignupChanged Bool

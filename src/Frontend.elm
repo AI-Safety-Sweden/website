@@ -164,6 +164,11 @@ update msg model =
                 NotLoggedIn _ ->
                     ( model, Command.none )
 
+        ToggledNotifyOnSignup enabled ->
+            updateLoggedIn
+                (\loggedIn -> ( { loggedIn | notifyOnSignup = enabled }, Lamdera.sendToBackend (SetNotifyOnSignupRequest enabled) ))
+                model
+
         PressedSubmission submissionId ->
             updateLoggedIn
                 (\loggedIn ->
@@ -238,6 +243,7 @@ loggedInPage data =
         , submissions = data.submissions
         , userTable = UserTable.init
         , userTableError = Nothing
+        , notifyOnSignup = data.notifyOnSignup
         , expandedSubmission = Nothing
         , confirmDeleteSubmission = Nothing
         }
@@ -277,6 +283,9 @@ updateFromBackend msg model =
             updateLoggedIn
                 (\loggedIn -> ( { loggedIn | submissions = SeqDict.insert submissionId submission loggedIn.submissions }, Command.none ))
                 model
+
+        NotifyOnSignupChanged enabled ->
+            updateLoggedIn (\loggedIn -> ( { loggedIn | notifyOnSignup = enabled }, Command.none )) model
 
         SubmissionDeleted submissionId ->
             updateLoggedIn
@@ -334,11 +343,32 @@ loggedInView zone model =
                 ]
             ]
         , section ("Signups (" ++ String.fromInt (SeqDict.size model.submissions) ++ ")")
-            [ if SeqDict.isEmpty model.submissions then
-                Html.text ""
+            [ Html.div
+                [ Attr.style "display" "flex"
+                , Attr.style "flex-wrap" "wrap"
+                , Attr.style "align-items" "center"
+                , Attr.style "gap" "12px 24px"
+                , Attr.style "margin-bottom" "12px"
+                ]
+                [ Html.label
+                    [ Attr.style "display" "flex", Attr.style "align-items" "center", Attr.style "gap" "8px", Attr.style "cursor" "pointer" ]
+                    [ Html.input
+                        [ Attr.type_ "checkbox"
+                        , Attr.checked model.notifyOnSignup
+                        , Html.Events.onCheck ToggledNotifyOnSignup
+                        , Attr.style "width" "18px"
+                        , Attr.style "height" "18px"
+                        , Attr.style "accent-color" Style.accent
+                        ]
+                        []
+                    , Html.text "Email me about new signups (at most one email an hour)"
+                    ]
+                , if SeqDict.isEmpty model.submissions then
+                    Html.text ""
 
-              else
-                Html.div [ Attr.style "margin-bottom" "12px" ] [ Style.smallButton PressedExportSignups "Export as JSON" ]
+                  else
+                    Style.smallButton PressedExportSignups "Export as JSON"
+                ]
             , submissionsView zone model
             ]
         , section "Users"

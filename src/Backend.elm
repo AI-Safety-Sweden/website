@@ -11,7 +11,7 @@ import Email.Html.Attributes
 import EmailAddress exposing (EmailAddress)
 import Env
 import Hex
-import Id exposing (Id, UserId)
+import Id exposing (Id, SubmissionId, UserId)
 import Lamdera as LamderaCore
 import List.Nonempty
 import LoginForm
@@ -20,7 +20,8 @@ import Quantity
 import SecretId
 import SeqDict exposing (SeqDict)
 import String.Nonempty exposing (NonemptyString(..))
-import Types exposing (AdminData, BackendModel, BackendMsg(..), ToBackend(..), ToFrontend(..))
+import Submission
+import Types exposing (AdminData, BackendModel, BackendMsg(..), SignupNotifications, ToBackend(..), ToFrontend(..))
 import User exposing (User)
 import UserTable
 
@@ -45,8 +46,17 @@ app_ =
     { init = init
     , update = update
     , updateFromFrontend = updateFromFrontend
-    , subscriptions = \_ -> Subscription.none
+    , subscriptions = subscriptions
     }
+
+
+subscriptions : BackendModel -> Subscription BackendOnly BackendMsg
+subscriptions model =
+    if List.any (\notifications -> not (List.isEmpty notifications.pending)) (SeqDict.values model.signupNotifications) then
+        Time.every Duration.minute CheckSignupNotifications
+
+    else
+        Subscription.none
 
 
 {-| `Env.adminEmail` can always log in. If they aren't in the user table (it's empty when the app
@@ -77,6 +87,7 @@ init =
       , sessions = SeqDict.empty
       , pendingLogins = SeqDict.empty
       , submissions = SeqDict.empty
+      , signupNotifications = SeqDict.empty
       , secretCounter = 0
       , serverSecret = SecretId.fromString Env.secretKey
       }
@@ -96,10 +107,62 @@ update msg model =
         SubmissionReceived submissionId ->
             case SeqDict.get submissionId model.submissions of
                 Just submission ->
-                    ( model, toLoggedInSessions model (SubmissionAdded submissionId submission) )
+                    ( model
+                    , Command.batch
+                        [ toLoggedInSessions model (SubmissionAdded submissionId submission)
+                        , Task.perform (GotTimeForSubmission submissionId) Time.now
+                        ]
+                    )
 
                 Nothing ->
                     ( model, Command.none )
+
+        GotTimeForSubmission submissionId time ->
+            SeqDict.foldl
+                (\userId notifications ( model2, cmds ) ->
+                    if List.isEmpty notifications.pending && hourHasPassed time notifications then
+                        ( { model2
+                            | signupNotifications =
+                                SeqDict.insert userId { lastSentAt = Just time, pending = [] } model2.signupNotifications
+                          }
+                        , sendSignupNotification userId [ submissionId ] model2 :: cmds
+                        )
+
+                    else
+                        ( { model2
+                            | signupNotifications =
+                                SeqDict.insert
+                                    userId
+                                    { notifications | pending = notifications.pending ++ [ submissionId ] }
+                                    model2.signupNotifications
+                          }
+                        , cmds
+                        )
+                )
+                ( model, [] )
+                model.signupNotifications
+                |> Tuple.mapSecond Command.batch
+
+        CheckSignupNotifications time ->
+            SeqDict.foldl
+                (\userId notifications ( model2, cmds ) ->
+                    if not (List.isEmpty notifications.pending) && hourHasPassed time notifications then
+                        ( { model2
+                            | signupNotifications =
+                                SeqDict.insert userId { lastSentAt = Just time, pending = [] } model2.signupNotifications
+                          }
+                        , sendSignupNotification userId notifications.pending model2 :: cmds
+                        )
+
+                    else
+                        ( model2, cmds )
+                )
+                ( model, [] )
+                model.signupNotifications
+                |> Tuple.mapSecond Command.batch
+
+        SentSignupNotification _ ->
+            ( model, Command.none )
 
 
 updateFromFrontend : SessionId -> ClientId -> ToBackend -> BackendModel -> ( BackendModel, Command BackendOnly ToFrontend BackendMsg )
@@ -212,6 +275,7 @@ updateFromFrontendWithTime time sessionId clientId msg model =
                                         | users = users
                                         , sessions = SeqDict.filter (\_ sessionUserId -> SeqDict.member sessionUserId users) model.sessions
                                         , recentLoginEmails = SeqDict.filter (\id _ -> SeqDict.member id users) model.recentLoginEmails
+                                        , signupNotifications = SeqDict.filter (\id _ -> SeqDict.member id users) model.signupNotifications
                                     }
                             in
                             ( model2
@@ -237,6 +301,29 @@ updateFromFrontendWithTime time sessionId clientId msg model =
                             { model | submissions = SeqDict.remove submissionId model.submissions }
                     in
                     ( model2, toLoggedInSessions model2 (SubmissionDeleted submissionId) )
+                )
+
+        SetNotifyOnSignupRequest enabled ->
+            asUser
+                sessionId
+                model
+                (\userId ->
+                    ( { model
+                        | signupNotifications =
+                            if enabled then
+                                SeqDict.update
+                                    userId
+                                    (\maybe -> Just (Maybe.withDefault { lastSentAt = Nothing, pending = [] } maybe))
+                                    model.signupNotifications
+
+                            else
+                                SeqDict.remove userId model.signupNotifications
+                      }
+                    , SeqDict.toList model.sessions
+                        |> List.filter (\( _, sessionUserId ) -> sessionUserId == userId)
+                        |> List.map (\( userSession, _ ) -> Lamdera.sendToFrontends userSession (NotifyOnSignupChanged enabled))
+                        |> Command.batch
+                    )
                 )
 
 
@@ -274,7 +361,18 @@ adminData userId model =
     { userId = userId
     , users = model.users
     , submissions = model.submissions
+    , notifyOnSignup = SeqDict.member userId model.signupNotifications
     }
+
+
+hourHasPassed : Time.Posix -> SignupNotifications -> Bool
+hourHasPassed time notifications =
+    case notifications.lastSentAt of
+        Just lastSentAt ->
+            Duration.from lastSentAt time |> Quantity.greaterThanOrEqualTo Duration.hour
+
+        Nothing ->
+            True
 
 
 toLoggedInSessions : BackendModel -> ToFrontend -> Command BackendOnly ToFrontend BackendMsg
@@ -368,3 +466,75 @@ sendLoginEmail emailAddress loginCode =
 
         Nothing ->
             Command.none
+
+
+adminSiteUrl : String
+adminSiteUrl =
+    "https://ai-safety-sweden.lamdera.app"
+
+
+sendSignupNotification : Id UserId -> List (Id SubmissionId) -> BackendModel -> Command BackendOnly ToFrontend BackendMsg
+sendSignupNotification userId submissionIds model =
+    let
+        people : List String
+        people =
+            List.filterMap
+                (\submissionId ->
+                    SeqDict.get submissionId model.submissions
+                        |> Maybe.map
+                            (\submission ->
+                                Submission.field "first_name" submission
+                                    ++ " "
+                                    ++ Submission.field "last_name" submission
+                                    ++ " ("
+                                    ++ Submission.field "email" submission
+                                    ++ ")"
+                            )
+                )
+                submissionIds
+    in
+    case
+        ( SeqDict.get userId model.users
+        , noReplyEmailAddress
+        , if Env.isProduction then
+            people
+
+          else
+            Debug.log "signup notification" people
+        )
+    of
+        ( Just user, Just from, [ person ] ) ->
+            signupEmail from user.email (NonemptyString 'N' ("ew signup: " ++ person)) [ person ]
+
+        ( Just user, Just from, _ :: _ :: _ ) ->
+            signupEmail from user.email (NonemptyString 'N' ("ew signups: " ++ String.fromInt (List.length people))) people
+
+        _ ->
+            Command.none
+
+
+signupEmail : EmailAddress -> EmailAddress -> NonemptyString -> List String -> Command BackendOnly ToFrontend BackendMsg
+signupEmail from to subject people =
+    { from = { name = "AI Safety Sweden", email = from }
+    , to = List.Nonempty.fromElement { name = "", email = to }
+    , subject = subject
+    , body =
+        Postmark.BodyBoth
+            (Email.Html.div
+                [ Email.Html.Attributes.padding "8px" ]
+                [ Email.Html.div [] [ Email.Html.text "New signups on aisafetysweden.se:" ]
+                , Email.Html.ul [] (List.map (\person -> Email.Html.li [] [ Email.Html.text person ]) people)
+                , Email.Html.div [] [ Email.Html.text ("See them at " ++ adminSiteUrl) ]
+                , Email.Html.div [ Email.Html.Attributes.color "#626B66" ]
+                    [ Email.Html.text "You get these because email notifications are turned on in the admin site. After an email, further signups wait an hour and come together." ]
+                ]
+            )
+            ("New signups on aisafetysweden.se:\n\n"
+                ++ String.join "\n" (List.map (\person -> "- " ++ person) people)
+                ++ "\n\nSee them at "
+                ++ adminSiteUrl
+                ++ "\n\nYou get these because email notifications are turned on in the admin site. After an email, further signups wait an hour and come together."
+            )
+    , messageStream = "outbound"
+    }
+        |> Postmark.sendEmail SentSignupNotification (Postmark.apiKey Env.postmarkApiKey)

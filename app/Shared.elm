@@ -1,4 +1,4 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), discordUrl, meetupGroupUrl, template)
+module Shared exposing (Data, Model, Msg(..), SharedMsg(..), discordUrl, joinUrl, meetupGroupUrl, template)
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
@@ -122,7 +122,7 @@ header =
                    ]
             )
             [ Html.a
-                [ Attr.href "#top"
+                [ Attr.href "/"
                 , Attr.attribute "aria-label" siteName
                 , Attr.style "display" "flex"
                 , Attr.style "align-items" "center"
@@ -159,7 +159,7 @@ header =
                     )
                     navLinks
                     ++ [ Html.a
-                            [ Attr.href discordUrl
+                            [ Attr.href joinUrl
                             , Attr.class "join-button"
                             , Attr.style "margin-left" "8px"
                             , Attr.style "padding" "10px 18px"
@@ -217,8 +217,8 @@ footer =
 
 navLinks : List ( String, String )
 navLinks =
-    [ ( "#contact", "Contact" )
-    , ( "#about", "About Us" )
+    [ ( "/#contact", "Contact" )
+    , ( "/#about", "About Us" )
     ]
 
 
@@ -226,7 +226,7 @@ externalLinks : List ( String, String )
 externalLinks =
     [ ( substackUrl, "Substack" )
     , ( meetupGroupUrl, "Meetup" )
-    , ( discordUrl, "Discord" )
+    , ( joinUrl, "Discord" )
     ]
 
 
@@ -238,6 +238,13 @@ substackUrl =
 meetupGroupUrl : String
 meetupGroupUrl =
     "https://www.meetup.com/stockholm-ai-safety/"
+
+
+{-| The signup form. Links to Discord go here first, and the form's thanks page links on to Discord.
+-}
+joinUrl : String
+joinUrl =
+    "/join"
 
 
 {-| Placeholder until the group has a Discord invite link.

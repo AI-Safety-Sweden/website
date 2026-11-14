@@ -231,7 +231,7 @@ hero nextEvent =
                 ]
                 [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
             , Html.a
-                [ Attr.href Shared.discordUrl
+                [ Attr.href Shared.joinUrl
                 , Attr.style "display" "inline-block"
                 , Attr.style "margin-top" "28px"
                 , Attr.style "padding" "24px 16px 24px 32px"

@@ -94,7 +94,7 @@ view _ _ =
                     , Attr.style "font-size" "clamp(20px, 3.5vw, 24px)"
                     , Attr.style "line-height" "1.45"
                     ]
-                    [ Html.text "Thanks for signing up. Come and say hello on our Discord." ]
+                    [ Html.text "Thanks for signing up. We've sent you a confirmation email." ]
                 , Html.a
                     [ Attr.href Shared.discordUrl
                     , Attr.style "display" "inline-block"

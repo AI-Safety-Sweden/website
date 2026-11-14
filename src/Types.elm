@@ -125,6 +125,7 @@ type BackendMsg
     | GotTimeForSubmission (Id SubmissionId) Time.Posix
     | CheckSignupNotifications Time.Posix
     | SentSignupNotification (Result Postmark.SendEmailError ())
+    | SentSignupConfirmation (Result Postmark.SendEmailError ())
 
 
 type ToFrontend

@@ -1,4 +1,4 @@
-module Env exposing (adminEmail, isProduction, postmarkApiKey, secretKey, signupSecret)
+module Env exposing (adminEmail, discordInviteUrl, isProduction, postmarkApiKey, secretKey, signupSecret)
 
 {-| Set these in the Lamdera dashboard for production. The values here are only used locally.
 -}
@@ -41,4 +41,12 @@ adminEmail =
 -}
 postmarkApiKey : String
 postmarkApiKey =
+    ""
+
+
+{-| The Discord invite link sent in the confirmation email to people who sign up. Leave it empty
+to send the confirmation without a link.
+-}
+discordInviteUrl : String
+discordInviteUrl =
     ""

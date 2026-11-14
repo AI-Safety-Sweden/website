@@ -20,7 +20,7 @@ import Quantity
 import SecretId
 import SeqDict exposing (SeqDict)
 import String.Nonempty exposing (NonemptyString(..))
-import Submission
+import Submission exposing (Submission)
 import Types exposing (AdminData, BackendModel, BackendMsg(..), SignupNotifications, ToBackend(..), ToFrontend(..))
 import User exposing (User)
 import UserTable
@@ -111,6 +111,7 @@ update msg model =
                     , Command.batch
                         [ toLoggedInSessions model (SubmissionAdded submissionId submission)
                         , Task.perform (GotTimeForSubmission submissionId) Time.now
+                        , sendSignupConfirmation submission
                         ]
                     )
 
@@ -162,6 +163,9 @@ update msg model =
                 |> Tuple.mapSecond Command.batch
 
         SentSignupNotification _ ->
+            ( model, Command.none )
+
+        SentSignupConfirmation _ ->
             ( model, Command.none )
 
 
@@ -538,3 +542,80 @@ signupEmail from to subject people =
     , messageStream = "outbound"
     }
         |> Postmark.sendEmail SentSignupNotification (Postmark.apiKey Env.postmarkApiKey)
+
+
+{-| Sent to the person who filled in the signup form.
+-}
+sendSignupConfirmation : Submission -> Command BackendOnly ToFrontend BackendMsg
+sendSignupConfirmation submission =
+    let
+        firstName : String
+        firstName =
+            String.trim (Submission.field "first_name" submission)
+
+        greeting : String
+        greeting =
+            if firstName == "" then
+                "Hi,"
+
+            else
+                "Hi " ++ firstName ++ ","
+
+        discordText : String
+        discordText =
+            if Env.discordInviteUrl == "" then
+                "We'll be in touch soon with a link to our Discord."
+
+            else
+                "Come and say hello on our Discord: " ++ Env.discordInviteUrl
+
+        footer : String
+        footer =
+            "If you didn't sign up at aisafetysweden.se you can safely ignore this email."
+    in
+    case
+        ( EmailAddress.fromString (String.trim (Submission.field "email" submission))
+            |> (\email ->
+                    if Env.isProduction then
+                        email
+
+                    else
+                        Debug.log "signup confirmation" email
+               )
+        , noReplyEmailAddress
+        )
+    of
+        ( Just to, Just from ) ->
+            { from = { name = "AI Safety Sweden", email = from }
+            , to = List.Nonempty.fromElement { name = firstName, email = to }
+            , subject = NonemptyString 'T' "hanks for signing up to AI Safety Sweden"
+            , body =
+                Postmark.BodyBoth
+                    (Email.Html.div
+                        [ Email.Html.Attributes.padding "8px" ]
+                        [ Email.Html.p [] [ Email.Html.text greeting ]
+                        , Email.Html.p [] [ Email.Html.text "Thanks for signing up to AI Safety Sweden. We've got your form." ]
+                        , if Env.discordInviteUrl == "" then
+                            Email.Html.p [] [ Email.Html.text discordText ]
+
+                          else
+                            Email.Html.p []
+                                [ Email.Html.text "Come and say hello on our Discord: "
+                                , Email.Html.a [ Email.Html.Attributes.href Env.discordInviteUrl ] [ Email.Html.text Env.discordInviteUrl ]
+                                ]
+                        , Email.Html.p [] [ Email.Html.text "AI Safety Sweden" ]
+                        , Email.Html.p [ Email.Html.Attributes.color "#626B66" ] [ Email.Html.text footer ]
+                        ]
+                    )
+                    (greeting
+                        ++ "\n\nThanks for signing up to AI Safety Sweden. We've got your form.\n\n"
+                        ++ discordText
+                        ++ "\n\nAI Safety Sweden\n\n"
+                        ++ footer
+                    )
+            , messageStream = "outbound"
+            }
+                |> Postmark.sendEmail SentSignupConfirmation (Postmark.apiKey Env.postmarkApiKey)
+
+        _ ->
+            Command.none

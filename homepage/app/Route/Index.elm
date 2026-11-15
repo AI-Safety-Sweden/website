@@ -14,6 +14,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Pages.Url
 import PagesMsg exposing (PagesMsg)
+import Route.About
 import RouteBuilder exposing (App, StatefulRoute)
 import Shared
 import Style
@@ -483,7 +484,7 @@ about =
                 , Attr.style "text-transform" "uppercase"
                 , Attr.style "color" Style.accent
                 ]
-                [ Html.text "About us" ]
+                [ Html.text "Mission" ]
             , Html.div
                 [ Attr.style "flex" "999 1 560px"
                 , Attr.style "min-width" "0"
@@ -498,7 +499,7 @@ about =
                     , Attr.style "font-weight" "500"
                     , Attr.style "color" Style.textStrong
                     ]
-                    [ Html.text "AI has the potential to greatly benefit humanity, but there are existential risks in developing it too quickly and recklessly. We want to help inform the public and politicians about these risks as well offer a social space where people can discuss and learn more about AI." ]
+                    [ Html.text Route.About.missionTitle ]
                 , Html.div
                     [ Attr.style "margin-top" "40px"
                     , Attr.style "max-width" "680px"
@@ -509,8 +510,7 @@ about =
                     , Attr.style "line-height" "1.7"
                     , Attr.style "color" Style.textMuted
                     ]
-                    [ Html.p [ Attr.style "margin" "0" ] [ Html.text "Events are typically Wednesday and Thursday evening. They include discussions, lectures, workshops, and debates, and cover everything from technical and philosophical topics to political and societal impacts." ]
-                    , Html.p [ Attr.style "margin" "0" ] [ Html.text "We hope to see you at an upcoming event!" ]
+                    [ Html.p [ Attr.style "margin" "0" ] [ Html.text Route.About.missionBody ]
                     ]
                 ]
             ]

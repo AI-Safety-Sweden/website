@@ -218,21 +218,15 @@ footer =
 navLinks : List ( String, String )
 navLinks =
     [ ( "/#contact", "Contact" )
-    , ( "/#about", "About Us" )
+    , ( "/about", "About Us" )
     ]
 
 
 externalLinks : List ( String, String )
 externalLinks =
-    [ ( substackUrl, "Substack" )
-    , ( meetupGroupUrl, "Meetup" )
+    [ ( meetupGroupUrl, "Meetup" )
     , ( joinUrl, "Discord" )
     ]
-
-
-substackUrl : String
-substackUrl =
-    "https://substack.com/@aisafetysweden"
 
 
 meetupGroupUrl : String

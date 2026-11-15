@@ -1,4 +1,4 @@
-module Route.About exposing (ActionData, Data, Model, Msg, RouteParams, route)
+module Route.About exposing (ActionData, Data, Model, Msg, RouteParams, missionBody, missionTitle, route)
 
 import BackendTask exposing (BackendTask)
 import FatalError exposing (FatalError)
@@ -146,7 +146,7 @@ mission =
             , Attr.style "font-weight" "500"
             , Attr.style "color" Style.textStrong
             ]
-            [ Html.text "AI is advancing quickly, and our preparations have not kept pace." ]
+            [ Html.text missionTitle ]
         , Html.p
             [ Attr.style "margin" "24px 0 0"
             , Attr.style "max-width" "680px"
@@ -154,8 +154,18 @@ mission =
             , Attr.style "line-height" "1.7"
             , Attr.style "color" Style.textMuted
             ]
-            [ Html.text "AI Safety Sweden aims to reduce catastrophic risks from AI through capacity building. We will do this by running events, fellowships, workshops, and more." ]
+            [ Html.text missionBody ]
         ]
+
+
+missionTitle : String
+missionTitle =
+    "AI is advancing quickly, and our preparations have not kept pace."
+
+
+missionBody : String
+missionBody =
+    "AI Safety Sweden aims to reduce catastrophic risks from AI through capacity building. We will do this by running events, fellowships, workshops, and more."
 
 
 type alias TeamMember =

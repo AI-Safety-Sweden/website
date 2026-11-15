@@ -11,7 +11,6 @@ set -e
 
 cd "$(dirname "$0")"
 vt_dir=$(pwd)
-repo_root=$(git rev-parse --show-toplevel)
 
 # Which browser's snapshots to look at, matching run-snapshot-test.sh.
 browser=${SNAPSHOT_BROWSER:-chrome}
@@ -58,7 +57,7 @@ if [ ! -d node_modules/express ]; then
 fi
 
 echo "🔨 Compiling snapshot viewer..."
-"$(realpath "$repo_root/node_modules/.bin/lamdera")" make src/SnapshotViewer.elm --output=dist/snapshot-viewer.js
+"$(realpath "$vt_dir/../node_modules/.bin/lamdera")" make src/SnapshotViewer.elm --output=dist/snapshot-viewer.js
 
 port="${SNAPSHOT_VIEWER_PORT:-8878}"
 

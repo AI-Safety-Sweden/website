@@ -23,6 +23,9 @@ set -e
 cd "$(dirname "$0")"
 vt_dir=$(pwd)
 repo_root=$(git rev-parse --show-toplevel)
+# The elm-pages site is the folder above this one (homepage/ in the repo).
+site_dir=$(cd .. && pwd)
+site_subdir=${site_dir#"$repo_root"}
 
 # --- 1. Must be on a feature branch ----------------------------------------
 branch=$(git rev-parse --abbrev-ref HEAD)
@@ -107,7 +110,7 @@ render_snapshots() {
 # --- 2. Render current branch snapshots ------------------------------------
 echo ""
 echo "📸 Rendering current branch snapshots..."
-render_snapshots "$repo_root" "$current_dir"
+render_snapshots "$site_dir" "$current_dir"
 
 # --- 3. Render baseline snapshots for the base commit (cached) --------------
 if [ -d "$baseline_dir" ] && [ -n "$(ls -A "$baseline_dir" 2>/dev/null)" ]; then
@@ -129,10 +132,16 @@ else
   # take-snapshots.js, so a change to the test tooling can never masquerade as
   # a visual diff.
   git -C "$repo_root" worktree add --quiet --detach "$worktree" "$base_sha"
+  # Commits from before the site moved into homepage/ have it at the repo root.
+  if [ -f "$worktree$site_subdir/elm-pages.config.mjs" ]; then
+    baseline_site="$worktree$site_subdir"
+  else
+    baseline_site="$worktree"
+  fi
   # Reuse the already-installed node modules instead of reinstalling.
-  ln -s "$repo_root/node_modules" "$worktree/node_modules"
+  ln -s "$site_dir/node_modules" "$baseline_site/node_modules"
 
-  render_snapshots "$worktree" "$baseline_dir"
+  render_snapshots "$baseline_site" "$baseline_dir"
 
   cleanup
   trap - EXIT

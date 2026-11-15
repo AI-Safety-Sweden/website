@@ -3,8 +3,7 @@ module ReviewConfig exposing (config)
 {-| Do not rename the ReviewConfig module or the config function, because
 `elm-review` will look for these.
 
-The rules are the ones from at-chat that aren't specific to that app. NoUnused.Dependencies
-is left out because elm-pages needs dependencies that no module in app/ imports.
+The rules are the ones from at-chat that aren't specific to that app.
 
 -}
 
@@ -37,8 +36,6 @@ config : List Rule
 config =
     [ NoStaleReferences.rule
     , NoUnused.CustomTypeConstructors.rule []
-        -- elm-pages needs Shared.Msg even though nothing sends it yet
-        |> Review.Rule.ignoreErrorsForFiles [ "app/Shared.elm" ]
     , NoUnused.Patterns.rule
     , Docs.ReviewAtDocs.rule
     , NoConfusingPrefixOperator.rule
@@ -49,7 +46,11 @@ config =
     , NoMissingTypeExpose.rule
     , NoSimpleLetBody.rule
     , NoUnused.Exports.rule
+        -- app_ is for lamdera/program-test, and Lamdera calls LamderaRPC.process itself
+        |> Review.Rule.ignoreErrorsForFiles [ "src/Frontend.elm", "src/Backend.elm", "src/LamderaRPC.elm", "src/RPC.elm" ]
     , NoUnused.Modules.rule
+        -- Lamdera calls RPC.lamdera_handleEndpoints itself
+        |> Review.Rule.ignoreErrorsForFiles [ "src/RPC.elm" ]
     , NoUnused.Parameters.rule
     , ReviewPipelineStyles.rule
         [ ReviewPipelineStyles.forbid ReviewPipelineStyles.leftPizzaPipelines
@@ -64,13 +65,11 @@ config =
     , NoModuleOnExposedNames.rule
     , NoMissingTypeConstructor.rule
     , NoUnused.Variables.rule
-    , EncoderDecoderNaming.rule
+    , EncoderDecoderNaming.rule |> Review.Rule.ignoreErrorsForFiles [ "src/LamderaRPC.elm" ]
     , NoBrokenParserFunctions.rule
     ]
         |> List.map
             (\rule ->
                 rule
-                    |> Review.Rule.ignoreErrorsForDirectories [ ".elm-pages", "elm-stuff" ]
-                    -- Boilerplate from the elm-pages starter, shaped by what elm-pages expects
-                    |> Review.Rule.ignoreErrorsForFiles [ "app/Api.elm", "app/Effect.elm", "app/ErrorPage.elm", "app/View.elm" ]
+                    |> Review.Rule.ignoreErrorsForDirectories [ "vendored", "elm-stuff" ]
             )

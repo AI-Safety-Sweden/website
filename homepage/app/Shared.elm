@@ -218,7 +218,7 @@ footer =
 navLinks : List ( String, String )
 navLinks =
     [ ( "/#contact", "Contact" )
-    , ( "/#about", "About Us" )
+    , ( "/about", "About Us" )
     ]
 
 

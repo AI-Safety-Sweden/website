@@ -56,7 +56,7 @@ button onPress label =
     Html.button
         [ Html.Events.onClick onPress
         , Attr.type_ "button"
-        , Attr.style "padding" "10px 18px"
+        , Attr.style "padding" "4px 10px"
         , Attr.style "border" "none"
         , Attr.style "border-radius" "8px"
         , Attr.style "background" accent

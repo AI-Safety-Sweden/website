@@ -382,9 +382,9 @@ loggedInView zone model =
                 , Attr.style "gap" "12px"
                 , Attr.style "margin-top" "16px"
                 ]
-                (Style.button (UserTableMsg UserTable.PressedAddUserRow) "Add user"
+                (Style.smallButton (UserTableMsg UserTable.PressedAddUserRow) "Add user"
                     :: (if UserTable.hasChanges model.userTable then
-                            [ Style.button (UserTableMsg UserTable.PressedResetUserChanges) "Reset"
+                            [ Style.smallButton (UserTableMsg UserTable.PressedResetUserChanges) "Reset"
                             , Style.button PressedSaveUserChanges "Save changes"
                             ]
 

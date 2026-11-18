@@ -94,10 +94,16 @@ view :
     -> { body : List (Html msg), title : String }
 view _ _ _ _ pageView =
     { body =
-        [ Html.div [ Attr.id "top" ]
+        [ Html.div
+            [ Attr.id "top"
+            , Attr.style "display" "flex"
+            , Attr.style "flex-direction" "column"
+            , Attr.style "min-height" "100vh"
+            ]
             [ header
             , Html.main_
-                [ Attr.style "background-color" Style.background
+                [ Attr.style "flex-grow" "1"
+                , Attr.style "background-color" Style.background
                 , Attr.style "background-image" ("radial-gradient(" ++ Style.borderStrong ++ " 1px, transparent 1.5px)")
                 , Attr.style "background-size" "24px 24px"
                 , Attr.style "background-position" "12px 12px"

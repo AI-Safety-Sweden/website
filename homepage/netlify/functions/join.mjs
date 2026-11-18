@@ -14,14 +14,19 @@ const multipleChoice = new Set(["areas", "initiatives", "contrib_types"]);
 
 const redirect = (location) => new Response(null, { status: 303, headers: { location } });
 
-const errorPage = (status) =>
+const escapeHtml = (text) =>
+  text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+// `detail` is shown on the page, small and grey, so a failed signup can be diagnosed without the
+// Netlify logs. It never includes the secret.
+const errorPage = (status, detail = "") =>
   new Response(
     `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Something went wrong | AI Safety Sweden</title>
 <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 64px auto; padding: 0 20px; line-height: 1.6">
 <h1>Something went wrong</h1>
 <p>Your signup couldn't be saved. Please go back and try again in a moment.</p>
-<p><a href="/join">Back to the form</a></p>`,
+<p><a href="/join">Back to the form</a></p>${detail === "" ? "" : `<p style="color: #888; font-size: 14px">Error: ${escapeHtml(detail)}</p>`}`,
     { status, headers: { "content-type": "text/html; charset=utf-8" } },
   );
 
@@ -57,7 +62,7 @@ export default async (request) => {
   const secret = Netlify.env.get("SIGNUP_SECRET");
   if (!url || !secret) {
     console.error("SIGNUP_FORWARD_URL or SIGNUP_SECRET isn't set");
-    return errorPage(500);
+    return errorPage(500, "SIGNUP_FORWARD_URL or SIGNUP_SECRET isn't set");
   }
 
   try {
@@ -67,12 +72,13 @@ export default async (request) => {
       body: JSON.stringify({ secret, submittedAt: new Date().toISOString(), answers }),
     });
     if (!response.ok) {
-      console.error(`Lamdera app answered ${response.status}: ${await response.text()}`);
-      return errorPage(502);
+      const text = await response.text();
+      console.error(`Lamdera app answered ${response.status}: ${text}`);
+      return errorPage(502, `the admin site answered ${response.status}: ${text.slice(0, 200)}`);
     }
   } catch (error) {
     console.error("Couldn't reach the Lamdera app", error);
-    return errorPage(502);
+    return errorPage(502, `couldn't reach the admin site: ${error?.cause?.message ?? error?.message ?? error}`);
   }
 
   return redirect("/join/thanks");

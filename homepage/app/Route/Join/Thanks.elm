@@ -95,19 +95,6 @@ view _ _ =
                     , Attr.style "line-height" "1.45"
                     ]
                     [ Html.text "Thanks for signing up. We've sent you a confirmation email." ]
-                , Html.a
-                    [ Attr.href Shared.discordUrl
-                    , Attr.style "display" "inline-block"
-                    , Attr.style "margin-top" "28px"
-                    , Attr.style "padding" "18px 32px"
-                    , Attr.style "border-radius" "16px"
-                    , Attr.style "background" Style.accent
-                    , Attr.style "color" Style.background
-                    , Attr.style "font-size" "20px"
-                    , Attr.style "font-weight" "600"
-                    , Attr.style "text-decoration" "none"
-                    ]
-                    [ Html.text "Join our Discord" ]
                 ]
             ]
         ]

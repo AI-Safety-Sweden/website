@@ -561,13 +561,9 @@ sendSignupConfirmation submission =
             else
                 "Hi " ++ firstName ++ ","
 
-        discordText : String
-        discordText =
-            if Env.discordInviteUrl == "" then
-                "We'll be in touch soon with a link to our Discord."
-
-            else
-                "Come and say hello on our Discord: " ++ Env.discordInviteUrl
+        reviewText : String
+        reviewText =
+            "We're reviewing your signup and will contact you soon."
 
         footer : String
         footer =
@@ -595,21 +591,14 @@ sendSignupConfirmation submission =
                         [ Email.Html.Attributes.padding "8px" ]
                         [ Email.Html.p [] [ Email.Html.text greeting ]
                         , Email.Html.p [] [ Email.Html.text "Thanks for signing up to AI Safety Sweden. We've got your form." ]
-                        , if Env.discordInviteUrl == "" then
-                            Email.Html.p [] [ Email.Html.text discordText ]
-
-                          else
-                            Email.Html.p []
-                                [ Email.Html.text "Come and say hello on our Discord: "
-                                , Email.Html.a [ Email.Html.Attributes.href Env.discordInviteUrl ] [ Email.Html.text Env.discordInviteUrl ]
-                                ]
+                        , Email.Html.p [] [ Email.Html.text reviewText ]
                         , Email.Html.p [] [ Email.Html.text "AI Safety Sweden" ]
                         , Email.Html.p [ Email.Html.Attributes.color "#626B66" ] [ Email.Html.text footer ]
                         ]
                     )
                     (greeting
                         ++ "\n\nThanks for signing up to AI Safety Sweden. We've got your form.\n\n"
-                        ++ discordText
+                        ++ reviewText
                         ++ "\n\nAI Safety Sweden\n\n"
                         ++ footer
                     )

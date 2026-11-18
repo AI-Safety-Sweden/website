@@ -94,9 +94,14 @@ view :
     -> { body : List (Html msg), title : String }
 view _ _ _ _ pageView =
     { body =
-        [ Html.div [ Attr.id "top" ]
+        [ Html.div
+            [ Attr.id "top"
+            , Attr.style "display" "flex"
+            , Attr.style "flex-direction" "column"
+            , Attr.style "min-height" "100vh"
+            ]
             [ header
-            , Html.main_ [] pageView.body
+            , Html.main_ [ Attr.style "flex-grow" "1" ] pageView.body
             , footer
             ]
         ]

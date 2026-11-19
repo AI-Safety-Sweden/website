@@ -381,7 +381,7 @@ interests =
 cityView : String -> Html Msg
 cityView city =
     textQuestion
-        { name = "city", label = "City you currently live in", help = "", required = Required, kind = ShortText }
+        { name = "city", label = "City you currently live in (and country if you are outside Sweden)", help = "", required = Required, kind = ShortText }
         (Html.input
             (Attr.type_ "text"
                 :: Attr.id "city"

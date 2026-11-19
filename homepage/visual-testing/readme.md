@@ -35,9 +35,9 @@ on first run. If you later switch browsers, run
 - The pages come from `dist/all-paths.json`, so a new elm-pages route is
   snapshotted without any changes here. Viewports are listed in
   `take-snapshots.js`.
-- The event card would otherwise show whatever Meetup's next event is, so
+- The event card would otherwise show whatever the next Luma event is, so
   `/api/next-event` answers with the fixed event in `next-event.json`. The
-  build itself still fetches from Meetup and needs network access.
+  build itself still fetches from Luma and needs network access.
 - The base commit has to be an elm-pages app. Baselines can't be made for
   commits from before the elm-pages conversion.
 - Baselines are cached per browser and base commit. Delete `snapshots/` to

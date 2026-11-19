@@ -1,20 +1,20 @@
-// Meetup's API doesn't allow browser requests (its CORS preflight rejects the JSON
-// content type it requires), so the homepage fetches the next event through here.
-const query = `query { groupByUrlname(urlname: "stockholm-ai-safety") { events(first: 1, status: ACTIVE, sort: ASC) { edges { node { title dateTime endTime eventUrl venues { name city } } } } } }`;
+// Luma's iCal feed has no CORS headers, so the homepage fetches the next event through here.
+import { fetchNextEvent } from "../luma.mjs";
 
 export default async () => {
-  const response = await fetch("https://api.meetup.com/gql-ext", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
-  return new Response(await response.text(), {
-    status: response.status,
-    headers: {
-      "content-type": "application/json",
-      "netlify-cdn-cache-control": "public, durable, s-maxage=300, stale-while-revalidate=3600",
-    },
-  });
+  try {
+    return new Response(JSON.stringify(await fetchNextEvent(new Date())), {
+      headers: {
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "public, durable, s-maxage=300, stale-while-revalidate=3600",
+      },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: String(error) }), {
+      status: 502,
+      headers: { "content-type": "application/json" },
+    });
+  }
 };
 
 export const config = { path: "/api/next-event" };

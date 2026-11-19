@@ -1,4 +1,4 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), contactEmail, discordUrl, joinUrl, linkedInUrl, meetupGroupUrl, template)
+module Shared exposing (Data, Model, Msg(..), SharedMsg(..), contactEmail, discordUrl, joinUrl, linkedInUrl, lumaCalendarUrl, template)
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
@@ -224,7 +224,7 @@ navLinks =
 
 externalLinks : List ( String, String )
 externalLinks =
-    [ ( meetupGroupUrl, "Meetup" )
+    [ ( lumaCalendarUrl, "Luma" )
     , ( joinUrl, "Discord" )
     , ( linkedInUrl, "LinkedIn" )
     , ( "mailto:" ++ contactEmail, contactEmail )
@@ -241,9 +241,9 @@ contactEmail =
     "info@aisafetysweden.se"
 
 
-meetupGroupUrl : String
-meetupGroupUrl =
-    "https://www.meetup.com/stockholm-ai-safety/"
+lumaCalendarUrl : String
+lumaCalendarUrl =
+    "https://luma.com/aisafetysweden"
 
 
 {-| The signup form. Links to Discord go here first, and the form's thanks page links on to Discord.

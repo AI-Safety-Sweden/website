@@ -188,6 +188,7 @@ view _ _ model =
         [ hero model.nextEvent
         , about
         , groups
+        , contact
         ]
     }
 
@@ -606,6 +607,93 @@ groups =
                         , Attr.style "font-weight" "600"
                         ]
                         [ Html.text "Sign up and we'll help you start one →" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+contact : Html msg
+contact =
+    Html.section
+        [ Attr.id "contact"
+        , Attr.style "border-top" ("1px solid " ++ Style.border)
+        ]
+        [ Html.div
+            (Style.container
+                ++ [ Attr.style "padding-block" "clamp(56px, 10vw, 72px)"
+                   , Attr.style "display" "flex"
+                   , Attr.style "flex-wrap" "wrap"
+                   , Attr.style "gap" "32px 80px"
+                   ]
+            )
+            [ Html.h2
+                [ Attr.style "flex" "1 1 220px"
+                , Attr.style "margin" "0"
+                , Attr.style "font-family" Style.fontSans
+                , Attr.style "font-size" "18px"
+                , Attr.style "font-weight" "600"
+                , Attr.style "letter-spacing" "0.08em"
+                , Attr.style "text-transform" "uppercase"
+                , Attr.style "color" Style.accent
+                ]
+                [ Html.text "Contact" ]
+            , Html.div
+                [ Attr.style "flex" "999 1 560px"
+                , Attr.style "min-width" "0"
+                , Attr.style "max-width" "860px"
+                , Attr.style "padding" "clamp(24px, 5vw, 36px)"
+                , Attr.style "border" ("1px solid " ++ Style.borderStrong)
+                , Attr.style "border-radius" "20px"
+                , Attr.style "background" Style.surface
+                ]
+                [ Html.p
+                    [ Attr.style "margin" "0"
+                    , Attr.style "font-family" Style.fontDisplay
+                    , Attr.style "font-size" "clamp(24px, 4.5vw, 30px)"
+                    , Attr.style "font-weight" "600"
+                    , Attr.style "line-height" "1.3"
+                    , Attr.style "letter-spacing" "-0.01em"
+                    , Attr.style "color" Style.textStrong
+                    ]
+                    [ Html.text "Get in touch" ]
+                , Html.p
+                    [ Attr.style "margin" "12px 0 0"
+                    , Attr.style "max-width" "620px"
+                    , Attr.style "font-size" "18px"
+                    , Attr.style "line-height" "1.6"
+                    , Attr.style "color" Style.textMuted
+                    ]
+                    [ Html.text "Questions, ideas for collaboration, or want to help out? Send us an email and we'll get back to you." ]
+                , Html.div
+                    [ Attr.style "margin-top" "24px"
+                    , Attr.style "display" "flex"
+                    , Attr.style "flex-wrap" "wrap"
+                    , Attr.style "align-items" "center"
+                    , Attr.style "gap" "12px 24px"
+                    ]
+                    [ Html.a
+                        [ Attr.href ("mailto:" ++ Shared.contactEmail)
+                        , Attr.style "display" "inline-block"
+                        , Attr.style "max-width" "100%"
+                        , Attr.style "padding" "12px 22px"
+                        , Attr.style "border-radius" "999px"
+                        , Attr.style "background" Style.accent
+                        , Attr.style "color" Style.background
+                        , Attr.style "font-size" "18px"
+                        , Attr.style "font-weight" "600"
+                        , Attr.style "text-decoration" "none"
+                        , Attr.style "overflow-wrap" "anywhere"
+                        ]
+                        [ Html.text Shared.contactEmail ]
+                    , Html.a
+                        [ Attr.href Shared.linkedInUrl
+                        , Attr.style "padding-block" "12px"
+                        , Attr.style "font-size" "18px"
+                        , Attr.style "font-weight" "600"
+                        , Attr.style "color" Style.accent
+                        ]
+                        [ Html.text "Follow us on LinkedIn" ]
                     ]
                 ]
             ]

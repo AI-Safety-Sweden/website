@@ -195,7 +195,7 @@ teamMembers =
     , { name = "Martin Stewart"
       , role = "Web developer"
       , linkedIn = Nothing
-      , photo = Nothing
+      , photo = Just "/team/martin.jpg"
       }
     , { name = "AJ Weeks"
       , role = "Lead organizer of AI Safety Stockholm"

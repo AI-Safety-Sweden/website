@@ -42,11 +42,3 @@ adminEmail =
 postmarkApiKey : String
 postmarkApiKey =
     ""
-
-
-{-| The Discord invite link sent in the confirmation email to people who sign up. Leave it empty
-to send the confirmation without a link.
--}
-discordInviteUrl : String
-discordInviteUrl =
-    ""

@@ -536,7 +536,7 @@ teamMembers =
     , { name = "Vera Karlin"
       , role = "Bioinformatician"
       , profile = Just (LinkedIn "https://www.linkedin.com/in/vera-karlin/")
-      , photo = Nothing
+      , photo = Just "/team/vera.jpg"
       }
     , { name = "Martin Stewart"
       , role = "Web developer"

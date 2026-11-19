@@ -201,7 +201,7 @@ hero nextEvent =
                , Attr.style "display" "flex"
                , Attr.style "flex-wrap" "wrap"
                , Attr.style "gap" "48px 64px"
-               , Attr.style "align-items" "center"
+               , Attr.style "align-items" "flex-end"
                , Attr.style "justify-content" "space-between"
                ]
         )

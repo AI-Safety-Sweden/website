@@ -37,6 +37,7 @@ type Msg
     = TypedCity String
     | SelectedInvolvement Involvement
     | ToggledCheckbox String String Bool
+    | TypedOther String String
 
 
 type alias RouteParams =
@@ -114,6 +115,17 @@ update _ _ msg model =
                         Set.remove value checked
             in
             ( { model | checked = Dict.insert name checked2 model.checked }, Effect.none )
+
+        TypedOther name text ->
+            if String.trim text == "" then
+                ( model, Effect.none )
+
+            else
+                let
+                    checked =
+                        Maybe.withDefault Set.empty (Dict.get name model.checked)
+                in
+                ( { model | checked = Dict.insert name (Set.insert "other" checked) model.checked }, Effect.none )
 
 
 subscriptions : RouteParams -> UrlPath -> Shared.Model -> Model -> Sub Msg
@@ -627,10 +639,11 @@ questionView checked question =
                             , Attr.style "align-items" "center"
                             , Attr.style "gap" "8px 12px"
                             ]
-                            [ choiceRow (checkbox "other") "Other:"
+                            [ choiceRow (Attr.checked (Set.member "other" checkedValues) :: checkbox "other") "Other:"
                             , Html.input
                                 (Attr.type_ "text"
                                     :: Attr.name (question.name ++ "_other")
+                                    :: Html.Events.onInput (TypedOther question.name)
                                     :: Attr.attribute "aria-label" (question.label ++ " (other)")
                                     :: Attr.maxlength 300
                                     :: Attr.style "flex" "1 1 200px"

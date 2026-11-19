@@ -2,6 +2,7 @@ module Route.Index exposing (ActionData, Data, Event, Model, Msg, RouteParams, r
 
 import BackendTask exposing (BackendTask)
 import BackendTask.Custom
+import Browser.Dom
 import Date
 import Effect exposing (Effect)
 import FatalError exposing (FatalError)
@@ -14,12 +15,12 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Pages.Url
 import PagesMsg exposing (PagesMsg)
-import Route.About
 import RouteBuilder exposing (App, StatefulRoute)
 import Shared
 import Style
 import Svg
 import Svg.Attributes as SvgAttr
+import Task
 import Url
 import UrlPath exposing (UrlPath)
 import View exposing (View)
@@ -32,6 +33,7 @@ type alias Model =
 
 type Msg
     = GotNextEvent (Result Http.Error (Maybe Event))
+    | ScrolledToFragment
 
 
 type alias RouteParams =
@@ -92,7 +94,28 @@ fetchNextEvent =
 
 init : App Data ActionData RouteParams -> Shared.Model -> ( Model, Effect Msg )
 init app _ =
-    ( { nextEvent = app.data.nextEvent }, Effect.fromCmd fetchNextEvent )
+    ( { nextEvent = app.data.nextEvent }
+    , case app.url of
+        Just pageUrl ->
+            case pageUrl.fragment of
+                Just fragment ->
+                    Effect.batch [ Effect.fromCmd fetchNextEvent, Effect.fromCmd (scrollToFragment fragment) ]
+
+                Nothing ->
+                    Effect.fromCmd fetchNextEvent
+
+        Nothing ->
+            Effect.fromCmd fetchNextEvent
+    )
+
+
+{-| Links like "/#team" from other pages are followed without a page load, so the browser doesn't scroll to the section by itself.
+-}
+scrollToFragment : String -> Cmd Msg
+scrollToFragment fragment =
+    Browser.Dom.getElement fragment
+        |> Task.andThen (\element -> Browser.Dom.setViewport 0 element.element.y)
+        |> Task.attempt (\_ -> ScrolledToFragment)
 
 
 update : App Data ActionData RouteParams -> Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
@@ -102,6 +125,9 @@ update _ _ msg model =
             ( { model | nextEvent = nextEvent }, Effect.none )
 
         GotNextEvent (Err _) ->
+            ( model, Effect.none )
+
+        ScrolledToFragment ->
             ( model, Effect.none )
 
 
@@ -156,7 +182,9 @@ view _ _ model =
     { title = "AI Safety Sweden"
     , body =
         [ hero model.nextEvent
-        , about
+        , section "mission" "Mission" [ mission ]
+        , section "team" "Our team" [ team ]
+        , section "what-we-do" "What we do" [ whatWeDo ]
         , groups
         , contact
         ]
@@ -411,10 +439,10 @@ arrowIcon =
         ]
 
 
-about : Html msg
-about =
+section : String -> String -> List (Html msg) -> Html msg
+section id label content =
     Html.section
-        [ Attr.id "about"
+        [ Attr.id id
         , Attr.style "border-top" ("1px solid " ++ Style.border)
         ]
         [ Html.div
@@ -435,36 +463,247 @@ about =
                 , Attr.style "text-transform" "uppercase"
                 , Attr.style "color" Style.accent
                 ]
-                [ Html.text "Mission" ]
+                [ Html.text label ]
             , Html.div
                 [ Attr.style "flex" "999 1 560px"
                 , Attr.style "min-width" "0"
                 , Attr.style "max-width" "860px"
                 ]
-                [ Html.p
-                    [ Attr.style "margin" "0"
+                content
+            ]
+        ]
+
+
+mission : Html msg
+mission =
+    Html.div []
+        [ Html.p
+            [ Attr.style "margin" "0"
+            , Attr.style "font-family" Style.fontDisplay
+            , Attr.style "font-size" "clamp(24px, 4.5vw, 30px)"
+            , Attr.style "line-height" "1.35"
+            , Attr.style "letter-spacing" "-0.01em"
+            , Attr.style "font-weight" "500"
+            , Attr.style "color" Style.textStrong
+            ]
+            [ Html.text missionTitle ]
+        , Html.p
+            [ Attr.style "margin" "40px 0 0"
+            , Attr.style "max-width" "680px"
+            , Attr.style "font-size" "18px"
+            , Attr.style "line-height" "1.7"
+            , Attr.style "color" Style.textMuted
+            ]
+            [ Html.text missionBody ]
+        ]
+
+
+missionTitle : String
+missionTitle =
+    "AI is advancing quickly, and our preparations have not kept pace."
+
+
+missionBody : String
+missionBody =
+    "AI Safety Sweden aims to reduce catastrophic risks from AI through capacity building. We will do this by running events, fellowships, workshops, and more."
+
+
+type alias TeamMember =
+    { name : String
+    , role : String
+    , profile : Maybe ProfileLink
+    , photo : Maybe String
+    }
+
+
+type ProfileLink
+    = LinkedIn String
+    | GitHub String
+
+
+teamMembers : List TeamMember
+teamMembers =
+    [ { name = "Simon Holm"
+      , role = "AI safety fieldbuilder"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/simonholm97/")
+      , photo = Just "/team/simon.jpg"
+      }
+    , { name = "Riccardo Conte"
+      , role = "PhD student in AI runtime security assurance"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/riccardoconte-aisafety/")
+      , photo = Just "/team/riccardo.jpg"
+      }
+    , { name = "Vera Karlin"
+      , role = "Bioinformatician"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/vera-karlin/")
+      , photo = Nothing
+      }
+    , { name = "Martin Stewart"
+      , role = "Web developer"
+      , profile = Just (GitHub "https://github.com/MartinSStewart")
+      , photo = Just "/team/martin.jpg"
+      }
+    , { name = "AJ Weeks"
+      , role = "Lead organizer of AI Safety Stockholm"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/aj-weeks/")
+      , photo = Just "/team/ajweeks.jpg"
+      }
+    , { name = "Vivianne Manlai"
+      , role = "AI governance researcher"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/vivianne-manlai-a2130721b/")
+      , photo = Just "/team/vivianne.jpg"
+      }
+    ]
+
+
+team : Html msg
+team =
+    Html.ul
+        [ Attr.style "list-style" "none"
+        , Attr.style "margin" "0"
+        , Attr.style "padding" "0"
+        , Attr.style "display" "grid"
+        , Attr.style "grid-template-columns" "repeat(auto-fill, minmax(160px, 1fr))"
+        , Attr.style "gap" "32px 24px"
+        ]
+        (List.map teamMember teamMembers)
+
+
+teamMember : TeamMember -> Html msg
+teamMember member =
+    Html.li []
+        (List.concat
+            [ [ case member.photo of
+                    Just photo ->
+                        portrait member.name photo
+
+                    Nothing ->
+                        portraitPlaceholder member.name
+              , Html.p
+                    [ Attr.style "margin" "16px 0 0"
                     , Attr.style "font-family" Style.fontDisplay
-                    , Attr.style "font-size" "clamp(24px, 4.5vw, 30px)"
-                    , Attr.style "line-height" "1.35"
-                    , Attr.style "letter-spacing" "-0.01em"
-                    , Attr.style "font-weight" "500"
+                    , Attr.style "font-size" "20px"
+                    , Attr.style "font-weight" "600"
+                    , Attr.style "line-height" "1.25"
                     , Attr.style "color" Style.textStrong
                     ]
-                    [ Html.text Route.About.missionTitle ]
-                , Html.div
-                    [ Attr.style "margin-top" "40px"
-                    , Attr.style "max-width" "680px"
-                    , Attr.style "display" "flex"
-                    , Attr.style "flex-direction" "column"
-                    , Attr.style "gap" "20px"
-                    , Attr.style "font-size" "18px"
-                    , Attr.style "line-height" "1.7"
+                    [ Html.text member.name ]
+              , Html.p
+                    [ Attr.style "margin" "4px 0 0"
+                    , Attr.style "font-size" "16px"
+                    , Attr.style "line-height" "1.45"
                     , Attr.style "color" Style.textMuted
                     ]
-                    [ Html.p [ Attr.style "margin" "0" ] [ Html.text Route.About.missionBody ]
-                    ]
-                ]
+                    [ Html.text member.role ]
+              ]
+            , case member.profile of
+                Just (LinkedIn url) ->
+                    [ profileLink member.name "LinkedIn" url ]
+
+                Just (GitHub url) ->
+                    [ profileLink member.name "GitHub" url ]
+
+                Nothing ->
+                    []
             ]
+        )
+
+
+profileLink : String -> String -> String -> Html msg
+profileLink name site url =
+    Html.a
+        [ Attr.href url
+        , Attr.attribute "aria-label" (name ++ " on " ++ site)
+        , Attr.style "display" "inline-block"
+        , Attr.style "padding-block" "8px"
+        , Attr.style "font-size" "16px"
+        , Attr.style "font-weight" "600"
+        , Attr.style "color" Style.accent
+        ]
+        [ Html.text site ]
+
+
+{-| The photos in public/team/ are already grayscale.
+-}
+portrait : String -> String -> Html msg
+portrait name photo =
+    Html.img
+        [ Attr.src photo
+        , Attr.alt ("Portrait of " ++ name)
+        , Attr.attribute "loading" "lazy"
+        , Attr.style "display" "block"
+        , Attr.style "width" "100%"
+        , Attr.style "aspect-ratio" "1 / 1"
+        , Attr.style "object-fit" "cover"
+        , Attr.style "border-radius" "12px"
+        , Attr.style "border" ("1px solid " ++ Style.borderStrong)
+        , Attr.style "background" Style.chrome
+        ]
+        []
+
+
+{-| Stands in for a portrait photo until we have one.
+-}
+portraitPlaceholder : String -> Html msg
+portraitPlaceholder name =
+    Html.div
+        [ Attr.attribute "role" "img"
+        , Attr.attribute "aria-label" ("Portrait of " ++ name)
+        , Attr.style "aspect-ratio" "1 / 1"
+        , Attr.style "border-radius" "12px"
+        , Attr.style "border" ("1px solid " ++ Style.borderStrong)
+        , Attr.style "background" Style.chrome
+        , Attr.style "overflow" "hidden"
+        ]
+        [ Svg.svg
+            [ SvgAttr.viewBox "0 0 100 100"
+            , SvgAttr.width "100%"
+            , SvgAttr.height "100%"
+            , SvgAttr.fill Style.borderStrong
+            , Attr.attribute "aria-hidden" "true"
+            , Attr.style "display" "block"
+            ]
+            [ Svg.circle [ SvgAttr.cx "50", SvgAttr.cy "40", SvgAttr.r "17" ] []
+            , Svg.path [ SvgAttr.d "M14 100 C14 76 30 64 50 64 C70 64 86 76 86 100 Z" ] []
+            ]
+        ]
+
+
+whatWeDo : Html msg
+whatWeDo =
+    Html.dl
+        [ Attr.style "margin" "0"
+        , Attr.style "display" "grid"
+        , Attr.style "grid-template-columns" "repeat(auto-fit, minmax(240px, 1fr))"
+        , Attr.style "gap" "16px"
+        ]
+        [ activity "Fellowships" "An online, 6-week course covering everything you need to know to get up to date with AI risk."
+        , activity "Local events" "Group discussions and seminars."
+        ]
+
+
+activity : String -> String -> Html msg
+activity name text =
+    Html.div
+        [ Attr.style "padding" "24px"
+        , Attr.style "border" ("1px solid " ++ Style.borderStrong)
+        , Attr.style "border-radius" "16px"
+        , Attr.style "background" Style.surface
+        ]
+        [ Html.dt
+            [ Attr.style "font-family" Style.fontDisplay
+            , Attr.style "font-size" "22px"
+            , Attr.style "font-weight" "600"
+            , Attr.style "color" Style.textStrong
+            ]
+            [ Html.text name ]
+        , Html.dd
+            [ Attr.style "margin" "8px 0 0"
+            , Attr.style "font-size" "18px"
+            , Attr.style "line-height" "1.6"
+            , Attr.style "color" Style.textMuted
+            ]
+            [ Html.text text ]
         ]
 
 

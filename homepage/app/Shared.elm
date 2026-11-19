@@ -1,4 +1,4 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), discordUrl, joinUrl, meetupGroupUrl, template)
+module Shared exposing (Data, Model, Msg(..), SharedMsg(..), contactEmail, discordUrl, joinUrl, linkedInUrl, meetupGroupUrl, template)
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
@@ -226,7 +226,19 @@ externalLinks : List ( String, String )
 externalLinks =
     [ ( meetupGroupUrl, "Meetup" )
     , ( joinUrl, "Discord" )
+    , ( linkedInUrl, "LinkedIn" )
+    , ( "mailto:" ++ contactEmail, contactEmail )
     ]
+
+
+linkedInUrl : String
+linkedInUrl =
+    "https://www.linkedin.com/company/88036557/"
+
+
+contactEmail : String
+contactEmail =
+    "info@aisafetysweden.se"
 
 
 meetupGroupUrl : String

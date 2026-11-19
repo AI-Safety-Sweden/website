@@ -11,6 +11,8 @@ import PagesMsg exposing (PagesMsg)
 import RouteBuilder exposing (App, StatelessRoute)
 import Shared
 import Style
+import Svg
+import Svg.Attributes as SvgAttr
 import UrlPath
 import View exposing (View)
 
@@ -75,7 +77,6 @@ view _ _ =
         , section "mission" "Mission" [ mission ]
         , section "team" "Our team" [ team ]
         , section "what-we-do" "What we do" [ whatWeDo ]
-        , section "partnerships" "Partnerships" [ partnerships ]
         ]
     }
 
@@ -171,35 +172,47 @@ missionBody =
 type alias TeamMember =
     { name : String
     , role : String
-    , linkedIn : Maybe String
+    , profile : Maybe ProfileLink
+    , photo : Maybe String
     }
+
+
+type ProfileLink
+    = LinkedIn String
+    | GitHub String
 
 
 teamMembers : List TeamMember
 teamMembers =
     [ { name = "Simon Holm"
       , role = "AI safety fieldbuilder"
-      , linkedIn = Just "https://www.linkedin.com/in/simonholm97/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/simonholm97/")
+      , photo = Just "/team/simon.jpg"
       }
     , { name = "Riccardo Conte"
       , role = "PhD student in AI runtime security assurance"
-      , linkedIn = Just "https://www.linkedin.com/in/riccardoconte-aisafety/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/riccardoconte-aisafety/")
+      , photo = Just "/team/riccardo.jpg"
       }
     , { name = "Vera Karlin"
       , role = "Bioinformatician"
-      , linkedIn = Just "https://www.linkedin.com/in/vera-karlin/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/vera-karlin/")
+      , photo = Nothing
       }
     , { name = "Martin Stewart"
       , role = "Web developer"
-      , linkedIn = Nothing
+      , profile = Just (GitHub "https://github.com/MartinSStewart")
+      , photo = Just "/team/martin.jpg"
       }
     , { name = "AJ Weeks"
       , role = "Lead organizer of AI Safety Stockholm"
-      , linkedIn = Just "https://www.linkedin.com/in/aj-weeks/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/aj-weeks/")
+      , photo = Just "/team/ajweeks.jpg"
       }
     , { name = "Vivianne Manlai"
       , role = "AI governance researcher"
-      , linkedIn = Just "https://www.linkedin.com/in/vivianne-manlai-a2130721b/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/vivianne-manlai-a2130721b/")
+      , photo = Just "/team/vivianne.jpg"
       }
     ]
 
@@ -221,7 +234,12 @@ teamMember : TeamMember -> Html msg
 teamMember member =
     Html.li []
         (List.concat
-            [ [ portraitPlaceholder member.name
+            [ [ case member.photo of
+                    Just photo ->
+                        portrait member.name photo
+
+                    Nothing ->
+                        portraitPlaceholder member.name
               , Html.p
                     [ Attr.style "margin" "16px 0 0"
                     , Attr.style "font-family" Style.fontDisplay
@@ -239,19 +257,12 @@ teamMember member =
                     ]
                     [ Html.text member.role ]
               ]
-            , case member.linkedIn of
-                Just url ->
-                    [ Html.a
-                        [ Attr.href url
-                        , Attr.attribute "aria-label" (member.name ++ " on LinkedIn")
-                        , Attr.style "display" "inline-block"
-                        , Attr.style "padding-block" "8px"
-                        , Attr.style "font-size" "16px"
-                        , Attr.style "font-weight" "600"
-                        , Attr.style "color" Style.accent
-                        ]
-                        [ Html.text "LinkedIn" ]
-                    ]
+            , case member.profile of
+                Just (LinkedIn url) ->
+                    [ profileLink member.name "LinkedIn" url ]
+
+                Just (GitHub url) ->
+                    [ profileLink member.name "GitHub" url ]
 
                 Nothing ->
                     []
@@ -259,19 +270,64 @@ teamMember member =
         )
 
 
-{-| Stands in for each person's portrait photo until we have them.
+profileLink : String -> String -> String -> Html msg
+profileLink name site url =
+    Html.a
+        [ Attr.href url
+        , Attr.attribute "aria-label" (name ++ " on " ++ site)
+        , Attr.style "display" "inline-block"
+        , Attr.style "padding-block" "8px"
+        , Attr.style "font-size" "16px"
+        , Attr.style "font-weight" "600"
+        , Attr.style "color" Style.accent
+        ]
+        [ Html.text site ]
+
+
+{-| The photos in public/team/ are already grayscale.
+-}
+portrait : String -> String -> Html msg
+portrait name photo =
+    Html.img
+        [ Attr.src photo
+        , Attr.alt ("Portrait of " ++ name)
+        , Attr.attribute "loading" "lazy"
+        , Attr.style "display" "block"
+        , Attr.style "width" "100%"
+        , Attr.style "aspect-ratio" "1 / 1"
+        , Attr.style "object-fit" "cover"
+        , Attr.style "border-radius" "12px"
+        , Attr.style "border" ("1px solid " ++ Style.borderStrong)
+        , Attr.style "background" Style.chrome
+        ]
+        []
+
+
+{-| Stands in for a portrait photo until we have one.
 -}
 portraitPlaceholder : String -> Html msg
 portraitPlaceholder name =
     Html.div
         [ Attr.attribute "role" "img"
         , Attr.attribute "aria-label" ("Portrait of " ++ name)
-        , Attr.style "aspect-ratio" "4 / 5"
+        , Attr.style "aspect-ratio" "1 / 1"
         , Attr.style "border-radius" "12px"
         , Attr.style "border" ("1px solid " ++ Style.borderStrong)
         , Attr.style "background" Style.chrome
+        , Attr.style "overflow" "hidden"
         ]
-        []
+        [ Svg.svg
+            [ SvgAttr.viewBox "0 0 100 100"
+            , SvgAttr.width "100%"
+            , SvgAttr.height "100%"
+            , SvgAttr.fill Style.borderStrong
+            , Attr.attribute "aria-hidden" "true"
+            , Attr.style "display" "block"
+            ]
+            [ Svg.circle [ SvgAttr.cx "50", SvgAttr.cy "40", SvgAttr.r "17" ] []
+            , Svg.path [ SvgAttr.d "M14 100 C14 76 30 64 50 64 C70 64 86 76 86 100 Z" ] []
+            ]
+        ]
 
 
 whatWeDo : Html msg
@@ -309,134 +365,4 @@ activity name text =
             , Attr.style "color" Style.textMuted
             ]
             [ Html.text text ]
-        ]
-
-
-type alias Partner =
-    { institution : String
-    , affiliation : Maybe String
-    , url : String
-    }
-
-
-partners : List Partner
-partners =
-    [ { institution = "AI Policy Lab"
-      , affiliation = Just "Umeå University"
-      , url = "https://aipolicylab.se/"
-      }
-    , { institution = "AI, Robotics and Cybersecurity Center"
-      , affiliation = Just "Örebro University"
-      , url = "https://www.oru.se/forskning/centrumbildningar/arc---centrum-for-ai-robotik-och-cybersakerhet/"
-      }
-    , { institution = "Centrum för cyberförsvar och informationssäkerhet"
-      , affiliation = Just "KTH"
-      , url = "https://www.kth.se/sv/cdis/centrum-for-cyberforsvar-och-informationssakerhet-1.1313344"
-      }
-    , { institution = "Digital Futures"
-      , affiliation = Just "KTH"
-      , url = "https://www.digitalfutures.kth.se/research/"
-      }
-    , { institution = "AI Lund"
-      , affiliation = Just "Lund University"
-      , url = "https://www.ai.lu.se/"
-      }
-    , { institution = "ICT, Digitalisation and AI"
-      , affiliation = Just "Chalmers University of Technology"
-      , url = "https://www.chalmers.se/en/research/selected-research-areas/ict/"
-      }
-    , { institution = "Center for Applied AI"
-      , affiliation = Just "RISE"
-      , url = "https://www.ri.se/en/ai-center"
-      }
-    , { institution = "AI Sweden"
-      , affiliation = Nothing
-      , url = "https://www.ai.se/en"
-      }
-    , { institution = "AI4X Center of Excellence/National Academic Infrastructure for Supercomputing"
-      , affiliation = Just "Linköping University"
-      , url = "https://liu.se/en/research/ai/ai4x-center-of-excellence"
-      }
-    , { institution = "AI Research Group"
-      , affiliation = Just "University of Uppsala"
-      , url = "https://www.uu.se/en/research/research-challenges/ai---artificial-intelligence"
-      }
-    , { institution = "Center for AI, Innovation and the Future of Work"
-      , affiliation = Just "Stockholm School of Economics"
-      , url = "https://www.hhs.se/research/centers/ai-innovation-future-of-work/"
-      }
-    , { institution = "Sweden AI Factory/MIMER"
-      , affiliation = Just "Stockholm/Linköping"
-      , url = "https://swedenaifactory.se/about/about-sweden-ai-factory/"
-      }
-    , { institution = "WASP Wallenberg"
-      , affiliation = Nothing
-      , url = "https://wasp-sweden.org/research/"
-      }
-    , { institution = "Research Institute for Sustainable AI"
-      , affiliation = Just "Independent"
-      , url = "https://www.risai.se/"
-      }
-    , { institution = "Trustworthy AI for Telecom Systems"
-      , affiliation = Just "Ericsson"
-      , url = "https://www.ericsson.com/en/reports-and-papers/white-papers/trustworthy-ai-for-telecom-systems"
-      }
-    , { institution = "Secure AI Conference 2026 in Stockholm"
-      , affiliation = Nothing
-      , url = "https://secureai.se/"
-      }
-    ]
-
-
-partnerships : Html msg
-partnerships =
-    Html.ul
-        [ Attr.style "list-style" "none"
-        , Attr.style "margin" "0"
-        , Attr.style "padding" "0"
-        , Attr.style "border-top" ("1px solid " ++ Style.border)
-        ]
-        (List.map partner partners)
-
-
-partner : Partner -> Html msg
-partner p =
-    Html.li
-        [ Attr.style "border-bottom" ("1px solid " ++ Style.border) ]
-        [ Html.a
-            [ Attr.href p.url
-            , Attr.style "display" "flex"
-            , Attr.style "flex-wrap" "wrap"
-            , Attr.style "align-items" "baseline"
-            , Attr.style "justify-content" "space-between"
-            , Attr.style "gap" "4px 24px"
-            , Attr.style "padding" "16px 0"
-            , Attr.style "text-decoration" "none"
-            ]
-            [ Html.span
-                [ Attr.style "flex" "1 1 320px"
-                , Attr.style "min-width" "0"
-                , Attr.style "font-size" "18px"
-                , Attr.style "font-weight" "600"
-                , Attr.style "line-height" "1.4"
-                , Attr.style "text-decoration" "underline"
-                , Attr.style "text-decoration-color" Style.borderStrong
-                , Attr.style "text-underline-offset" "4px"
-                ]
-                [ Html.text p.institution ]
-            , Html.span
-                [ Attr.style "flex" "0 1 auto"
-                , Attr.style "font-size" "16px"
-                , Attr.style "color" Style.textFaint
-                ]
-                [ Html.text
-                    (case p.affiliation of
-                        Just affiliation ->
-                            affiliation
-
-                        Nothing ->
-                            ""
-                    )
-                ]
-            ]
         ]

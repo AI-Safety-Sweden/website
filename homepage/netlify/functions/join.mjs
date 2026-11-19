@@ -70,6 +70,9 @@ export default async (request) => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ secret, submittedAt: new Date().toISOString(), answers }),
+      // The admin site normally answers in under a second. Give up well before Netlify's own
+      // function timeout, so the person gets the error page instead of a hanging request.
+      signal: AbortSignal.timeout(8000),
     });
     if (!response.ok) {
       const text = await response.text();
@@ -77,6 +80,10 @@ export default async (request) => {
       return errorPage(502, `the admin site answered ${response.status}: ${text.slice(0, 200)}`);
     }
   } catch (error) {
+    if (error?.name === "TimeoutError") {
+      console.error("The Lamdera app didn't answer within 8 seconds");
+      return errorPage(504, "the admin site didn't answer within 8 seconds");
+    }
     console.error("Couldn't reach the Lamdera app", error);
     return errorPage(502, `couldn't reach the admin site: ${error?.cause?.message ?? error?.message ?? error}`);
   }

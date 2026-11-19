@@ -8,7 +8,7 @@ Usage:
 
 The pages are taken from dist/all-paths.json, which elm-pages writes on build.
 /api/next-event (the Netlify function) answers with the fixed event in
-next-event.json, so the event card doesn't change when Meetup's next event does.
+next-event.json, so the event card doesn't change when the next Luma event does.
 
 */
 

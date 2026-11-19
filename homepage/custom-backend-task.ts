@@ -1,2 +1,6 @@
 // Custom BackendTasks go here. See https://elm-pages.com/docs/backend-task
-export {};
+import { fetchNextEvent } from "./netlify/luma.mjs";
+
+export async function nextEvent() {
+  return fetchNextEvent(new Date());
+}

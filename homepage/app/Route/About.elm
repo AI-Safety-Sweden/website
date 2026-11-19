@@ -11,6 +11,8 @@ import PagesMsg exposing (PagesMsg)
 import RouteBuilder exposing (App, StatelessRoute)
 import Shared
 import Style
+import Svg
+import Svg.Attributes as SvgAttr
 import UrlPath
 import View exposing (View)
 
@@ -170,41 +172,46 @@ missionBody =
 type alias TeamMember =
     { name : String
     , role : String
-    , linkedIn : Maybe String
+    , profile : Maybe ProfileLink
     , photo : Maybe String
     }
+
+
+type ProfileLink
+    = LinkedIn String
+    | GitHub String
 
 
 teamMembers : List TeamMember
 teamMembers =
     [ { name = "Simon Holm"
       , role = "AI safety fieldbuilder"
-      , linkedIn = Just "https://www.linkedin.com/in/simonholm97/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/simonholm97/")
       , photo = Just "/team/simon.jpg"
       }
     , { name = "Riccardo Conte"
       , role = "PhD student in AI runtime security assurance"
-      , linkedIn = Just "https://www.linkedin.com/in/riccardoconte-aisafety/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/riccardoconte-aisafety/")
       , photo = Just "/team/riccardo.jpg"
       }
     , { name = "Vera Karlin"
       , role = "Bioinformatician"
-      , linkedIn = Just "https://www.linkedin.com/in/vera-karlin/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/vera-karlin/")
       , photo = Nothing
       }
     , { name = "Martin Stewart"
       , role = "Web developer"
-      , linkedIn = Nothing
+      , profile = Just (GitHub "https://github.com/MartinSStewart")
       , photo = Just "/team/martin.jpg"
       }
     , { name = "AJ Weeks"
       , role = "Lead organizer of AI Safety Stockholm"
-      , linkedIn = Just "https://www.linkedin.com/in/aj-weeks/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/aj-weeks/")
       , photo = Just "/team/ajweeks.jpg"
       }
     , { name = "Vivianne Manlai"
       , role = "AI governance researcher"
-      , linkedIn = Just "https://www.linkedin.com/in/vivianne-manlai-a2130721b/"
+      , profile = Just (LinkedIn "https://www.linkedin.com/in/vivianne-manlai-a2130721b/")
       , photo = Just "/team/vivianne.jpg"
       }
     ]
@@ -250,24 +257,31 @@ teamMember member =
                     ]
                     [ Html.text member.role ]
               ]
-            , case member.linkedIn of
-                Just url ->
-                    [ Html.a
-                        [ Attr.href url
-                        , Attr.attribute "aria-label" (member.name ++ " on LinkedIn")
-                        , Attr.style "display" "inline-block"
-                        , Attr.style "padding-block" "8px"
-                        , Attr.style "font-size" "16px"
-                        , Attr.style "font-weight" "600"
-                        , Attr.style "color" Style.accent
-                        ]
-                        [ Html.text "LinkedIn" ]
-                    ]
+            , case member.profile of
+                Just (LinkedIn url) ->
+                    [ profileLink member.name "LinkedIn" url ]
+
+                Just (GitHub url) ->
+                    [ profileLink member.name "GitHub" url ]
 
                 Nothing ->
                     []
             ]
         )
+
+
+profileLink : String -> String -> String -> Html msg
+profileLink name site url =
+    Html.a
+        [ Attr.href url
+        , Attr.attribute "aria-label" (name ++ " on " ++ site)
+        , Attr.style "display" "inline-block"
+        , Attr.style "padding-block" "8px"
+        , Attr.style "font-size" "16px"
+        , Attr.style "font-weight" "600"
+        , Attr.style "color" Style.accent
+        ]
+        [ Html.text site ]
 
 
 {-| The photos in public/team/ are already grayscale.
@@ -300,8 +314,20 @@ portraitPlaceholder name =
         , Attr.style "border-radius" "12px"
         , Attr.style "border" ("1px solid " ++ Style.borderStrong)
         , Attr.style "background" Style.chrome
+        , Attr.style "overflow" "hidden"
         ]
-        []
+        [ Svg.svg
+            [ SvgAttr.viewBox "0 0 100 100"
+            , SvgAttr.width "100%"
+            , SvgAttr.height "100%"
+            , SvgAttr.fill Style.borderStrong
+            , Attr.attribute "aria-hidden" "true"
+            , Attr.style "display" "block"
+            ]
+            [ Svg.circle [ SvgAttr.cx "50", SvgAttr.cy "40", SvgAttr.r "17" ] []
+            , Svg.path [ SvgAttr.d "M14 100 C14 76 30 64 50 64 C70 64 86 76 86 100 Z" ] []
+            ]
+        ]
 
 
 whatWeDo : Html msg

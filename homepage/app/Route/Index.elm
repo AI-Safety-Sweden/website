@@ -682,7 +682,8 @@ whatWeDo =
             "An online, 6-week course covering everything you need to know to get up to date with AI risk."
             [ Html.a
                 [ Attr.href Shared.fellowshipUrl
-                , Attr.style "display" "inline-block"
+                , Attr.style "display" "block"
+                , Attr.style "width" "fit-content"
                 , Attr.style "margin-top" "12px"
                 , Attr.style "padding-block" "8px"
                 , Attr.style "font-size" "18px"

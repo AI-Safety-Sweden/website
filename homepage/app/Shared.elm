@@ -1,4 +1,15 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), contactEmail, discordUrl, joinUrl, linkedInUrl, meetupGroupUrl, template)
+module Shared exposing
+    ( Data
+    , Model
+    , Msg(..)
+    , SharedMsg(..)
+    , contactEmail
+    , fellowshipUrl
+    , joinUrl
+    , linkedInUrl
+    , lumaCalendarUrl
+    , template
+    )
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
@@ -94,9 +105,21 @@ view :
     -> { body : List (Html msg), title : String }
 view _ _ _ _ pageView =
     { body =
-        [ Html.div [ Attr.id "top" ]
+        [ Html.div
+            [ Attr.id "top"
+            , Attr.style "display" "flex"
+            , Attr.style "flex-direction" "column"
+            , Attr.style "min-height" "100vh"
+            ]
             [ header
-            , Html.main_ [] pageView.body
+            , Html.main_
+                [ Attr.style "flex-grow" "1"
+                , Attr.style "background-color" Style.background
+                , Attr.style "background-image" ("radial-gradient(" ++ "#DFDFDF" ++ " 0.5px, transparent 1.5px)")
+                , Attr.style "background-size" "24px 24px"
+                , Attr.style "background-position" "12px 12px"
+                ]
+                pageView.body
             , footer
             ]
         ]
@@ -198,6 +221,8 @@ footer =
                 [ Attr.style "display" "flex"
                 , Attr.style "align-items" "center"
                 , Attr.style "gap" "12px"
+                , Attr.style "font-family" Style.fontDisplay
+                , Attr.style "font-weight" "700"
                 ]
                 [ treeLogo, Html.text siteName ]
             , Html.div
@@ -218,13 +243,14 @@ footer =
 navLinks : List ( String, String )
 navLinks =
     [ ( "/#contact", "Contact" )
-    , ( "/about", "About Us" )
+    , ( "/#team", "About Us" )
     ]
 
 
 externalLinks : List ( String, String )
 externalLinks =
-    [ ( meetupGroupUrl, "Meetup" )
+    [ ( lumaCalendarUrl, "Luma" )
+    , ( fellowshipUrl, "Fellowship" )
     , ( joinUrl, "Discord" )
     , ( linkedInUrl, "LinkedIn" )
     , ( "mailto:" ++ contactEmail, contactEmail )
@@ -241,9 +267,14 @@ contactEmail =
     "info@aisafetysweden.se"
 
 
-meetupGroupUrl : String
-meetupGroupUrl =
-    "https://www.meetup.com/stockholm-ai-safety/"
+fellowshipUrl : String
+fellowshipUrl =
+    "https://forms.gle/TZ3iCVVqhTqLkmGX9"
+
+
+lumaCalendarUrl : String
+lumaCalendarUrl =
+    "https://luma.com/aisafetysweden"
 
 
 {-| The signup form. Links to Discord go here first, and the form's thanks page links on to Discord.
@@ -251,13 +282,6 @@ meetupGroupUrl =
 joinUrl : String
 joinUrl =
     "/join"
-
-
-{-| Placeholder until the group has a Discord invite link.
--}
-discordUrl : String
-discordUrl =
-    "#"
 
 
 treeLogo : Html msg

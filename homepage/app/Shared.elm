@@ -1,4 +1,4 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), contactEmail, discordUrl, joinUrl, linkedInUrl, lumaCalendarUrl, template)
+module Shared exposing (Data, Model, Msg(..), SharedMsg(..), contactEmail, discordUrl, fellowshipUrl, joinUrl, linkedInUrl, lumaCalendarUrl, template)
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
@@ -237,6 +237,7 @@ navLinks =
 externalLinks : List ( String, String )
 externalLinks =
     [ ( lumaCalendarUrl, "Luma" )
+    , ( fellowshipUrl, "Fellowship" )
     , ( joinUrl, "Discord" )
     , ( linkedInUrl, "LinkedIn" )
     , ( "mailto:" ++ contactEmail, contactEmail )
@@ -251,6 +252,11 @@ linkedInUrl =
 contactEmail : String
 contactEmail =
     "info@aisafetysweden.se"
+
+
+fellowshipUrl : String
+fellowshipUrl =
+    "https://forms.gle/TZ3iCVVqhTqLkmGX9"
 
 
 lumaCalendarUrl : String

@@ -677,13 +677,26 @@ whatWeDo =
         , Attr.style "grid-template-columns" "repeat(auto-fit, minmax(240px, 1fr))"
         , Attr.style "gap" "16px"
         ]
-        [ activity "Fellowships" "An online, 6-week course covering everything you need to know to get up to date with AI risk."
-        , activity "Local events" "Group discussions and seminars."
+        [ activity
+            "Fellowships"
+            "An online, 6-week course covering everything you need to know to get up to date with AI risk."
+            [ Html.a
+                [ Attr.href Shared.fellowshipUrl
+                , Attr.style "display" "inline-block"
+                , Attr.style "margin-top" "12px"
+                , Attr.style "padding-block" "8px"
+                , Attr.style "font-size" "18px"
+                , Attr.style "font-weight" "600"
+                , Attr.style "color" Style.accent
+                ]
+                [ Html.text "Apply for the fellowship" ]
+            ]
+        , activity "Local events" "Group discussions and seminars." []
         ]
 
 
-activity : String -> String -> Html msg
-activity name text =
+activity : String -> String -> List (Html msg) -> Html msg
+activity name text extra =
     Html.div
         [ Attr.style "padding" "24px"
         , Attr.style "border" ("1px solid " ++ Style.borderStrong)
@@ -703,7 +716,7 @@ activity name text =
             , Attr.style "line-height" "1.6"
             , Attr.style "color" Style.textMuted
             ]
-            [ Html.text text ]
+            (Html.text text :: extra)
         ]
 
 

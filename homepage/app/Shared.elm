@@ -1,4 +1,15 @@
-module Shared exposing (Data, Model, Msg(..), SharedMsg(..), contactEmail, discordUrl, fellowshipUrl, joinUrl, linkedInUrl, lumaCalendarUrl, template)
+module Shared exposing
+    ( Data
+    , Model
+    , Msg(..)
+    , SharedMsg(..)
+    , contactEmail
+    , fellowshipUrl
+    , joinUrl
+    , linkedInUrl
+    , lumaCalendarUrl
+    , template
+    )
 
 import BackendTask exposing (BackendTask)
 import Effect exposing (Effect)
@@ -104,7 +115,7 @@ view _ _ _ _ pageView =
             , Html.main_
                 [ Attr.style "flex-grow" "1"
                 , Attr.style "background-color" Style.background
-                , Attr.style "background-image" ("radial-gradient(" ++ Style.borderStrong ++ " 1px, transparent 1.5px)")
+                , Attr.style "background-image" ("radial-gradient(" ++ "#DFDFDF" ++ " 0.5px, transparent 1.5px)")
                 , Attr.style "background-size" "24px 24px"
                 , Attr.style "background-position" "12px 12px"
                 ]
@@ -269,13 +280,6 @@ lumaCalendarUrl =
 joinUrl : String
 joinUrl =
     "/join"
-
-
-{-| Placeholder until the group has a Discord invite link.
--}
-discordUrl : String
-discordUrl =
-    "#"
 
 
 treeLogo : Html msg

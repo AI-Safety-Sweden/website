@@ -230,7 +230,7 @@ hero nextEvent =
                 , Attr.style "font-size" "clamp(20px, 3.5vw, 24px)"
                 , Attr.style "line-height" "1.45"
                 ]
-                [ Html.text "A space to discuss AI, spread awareness of its risks, and organize political activism." ]
+                [ Html.text "A space to discuss AI, spread awareness of its risks, and work on capacity building." ]
             , Html.a
                 [ Attr.href Shared.joinUrl
                 , Attr.style "display" "inline-block"
@@ -247,7 +247,7 @@ hero nextEvent =
                 ]
                 [ Html.div
                     [ Attr.style "display" "flex", Attr.style "align-items" "center", Attr.style "gap" "16px" ]
-                    [ Html.text "Take part in the future.\nBecome a member"
+                    [ Html.text "Take part in the future\nBecome a member"
                     , Html.div
                         [ Attr.style "display" "inline-block"
                         , Attr.style "font-size" "32px"

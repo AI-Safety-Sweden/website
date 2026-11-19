@@ -563,7 +563,7 @@ team =
         , Attr.style "margin" "0"
         , Attr.style "padding" "0"
         , Attr.style "display" "grid"
-        , Attr.style "grid-template-columns" "repeat(auto-fill, minmax(160px, 1fr))"
+        , Attr.style "grid-template-columns" "repeat(auto-fill, minmax(min(160px, calc((100% - 24px) / 2)), 1fr))"
         , Attr.style "gap" "32px 24px"
         ]
         (List.map teamMember teamMembers)

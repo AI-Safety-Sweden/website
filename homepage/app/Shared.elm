@@ -221,6 +221,8 @@ footer =
                 [ Attr.style "display" "flex"
                 , Attr.style "align-items" "center"
                 , Attr.style "gap" "12px"
+                , Attr.style "font-family" Style.fontDisplay
+                , Attr.style "font-weight" "700"
                 ]
                 [ treeLogo, Html.text siteName ]
             , Html.div

@@ -1,6 +1,7 @@
 // The next event on the AI Safety Sweden Luma calendar, read from its public iCal feed (no API key needed).
 // Used by the Netlify function netlify/functions/next-event.mjs and at build time by custom-backend-task.ts.
 const icalUrl = "https://api.lu.ma/ics/get?entity=calendar&id=cal-finBJrhLOfffXbS";
+const calendarUrl = "https://luma.com/aisafetysweden";
 
 export async function fetchNextEvent(now) {
   const response = await fetch(icalUrl);
@@ -46,15 +47,22 @@ function parseEvents(ical) {
     .filter((event) => event.DTSTART && event.DTEND && event.SUMMARY)
     .map((event) => {
       const description = unescapeText(event.DESCRIPTION || "");
-      const link = description.match(/https:\/\/luma\.com\/[\w-]+/);
+      // Luma's own events link to their page in the description. Events added to the calendar from
+      // elsewhere (e.g. Meetup) only link to the calendar there, and put their own page in LOCATION.
+      const link = (description.match(/https:\/\/luma\.com\/[\w-]+/g) || []).find(
+        (url) => url !== calendarUrl
+      );
       const location = unescapeText(event.LOCATION || "").replace(/, Sweden$/, "");
+      const locationIsUrl = /^https?:\/\//.test(location);
       return {
         title: unescapeText(event.SUMMARY),
         start: parseDate(event.DTSTART),
         end: parseDate(event.DTEND),
         status: event.STATUS || "",
-        url: link ? link[0] : `https://luma.com/event/${(event.UID || "").split("@")[0]}`,
-        location: location === "" ? null : location,
+        url:
+          link ??
+          (locationIsUrl ? location : `https://luma.com/event/${(event.UID || "").split("@")[0]}`),
+        location: location === "" || locationIsUrl ? null : location,
       };
     });
 }

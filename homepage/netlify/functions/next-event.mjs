@@ -6,7 +6,7 @@ export default async () => {
     return new Response(JSON.stringify(await fetchNextEvent(new Date())), {
       headers: {
         "content-type": "application/json",
-        "netlify-cdn-cache-control": "public, durable, s-maxage=300, stale-while-revalidate=3600",
+        "netlify-cdn-cache-control": "public, durable, s-maxage=300",
       },
     });
   } catch (error) {

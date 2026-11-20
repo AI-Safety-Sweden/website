@@ -1,4 +1,4 @@
-module Route.Index exposing (ActionData, Data, Event, Model, Msg, RouteParams, route)
+module Route.Index exposing (ActionData, Data, Event, Model, Msg, NextEvent, RouteParams, route)
 
 import BackendTask exposing (BackendTask)
 import BackendTask.Custom
@@ -27,8 +27,16 @@ import View exposing (View)
 
 
 type alias Model =
-    { nextEvent : Maybe Event
+    { nextEvent : NextEvent
     }
+
+
+{-| The page is built with the next event as of the deploy, which goes stale until the next deploy.
+So in the browser the card stays hidden until /api/next-event answers, rather than briefly showing an old event.
+-}
+type NextEvent
+    = Loading
+    | Loaded (Maybe Event)
 
 
 type Msg
@@ -94,7 +102,7 @@ fetchNextEvent =
 
 init : App Data ActionData RouteParams -> Shared.Model -> ( Model, Effect Msg )
 init app _ =
-    ( { nextEvent = app.data.nextEvent }
+    ( { nextEvent = Loading }
     , case app.url of
         Just pageUrl ->
             case pageUrl.fragment of
@@ -119,13 +127,13 @@ scrollToFragment fragment =
 
 
 update : App Data ActionData RouteParams -> Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
-update _ _ msg model =
+update app _ msg model =
     case msg of
         GotNextEvent (Ok nextEvent) ->
-            ( { model | nextEvent = nextEvent }, Effect.none )
+            ( { model | nextEvent = Loaded nextEvent }, Effect.none )
 
         GotNextEvent (Err _) ->
-            ( model, Effect.none )
+            ( { model | nextEvent = Loaded app.data.nextEvent }, Effect.none )
 
         ScrolledToFragment ->
             ( model, Effect.none )
@@ -178,10 +186,10 @@ view :
     -> Shared.Model
     -> Model
     -> View (PagesMsg Msg)
-view _ _ model =
+view app _ model =
     { title = "AI Safety Sweden"
     , body =
-        [ hero model.nextEvent
+        [ hero app.data.nextEvent model.nextEvent
         , section "mission" "Mission" [ mission ]
         , section "team" "Our team" [ team ]
         , section "what-we-do" "What we do" [ whatWeDo ]
@@ -191,8 +199,8 @@ view _ _ model =
     }
 
 
-hero : Maybe Event -> Html msg
-hero nextEvent =
+hero : Maybe Event -> NextEvent -> Html msg
+hero builtNextEvent nextEvent =
     Html.section
         (Style.container
             ++ [ Attr.style "padding-block" "clamp(40px, 9vw, 80px)"
@@ -257,7 +265,7 @@ hero nextEvent =
                     ]
                 ]
             ]
-        , eventCard nextEvent
+        , eventCard builtNextEvent nextEvent
         ]
 
 
@@ -271,10 +279,17 @@ arrowRight =
         [ Svg.path [ SvgAttr.fillRule "evenodd", SvgAttr.d "M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z", SvgAttr.clipRule "evenodd" ] [] ]
 
 
-eventCard : Maybe Event -> Html msg
-eventCard nextEvent =
+eventCard : Maybe Event -> NextEvent -> Html msg
+eventCard builtNextEvent nextEvent =
     Html.aside
         [ Attr.attribute "aria-label" "Next event"
+        , Attr.attribute "aria-busy"
+            (if nextEvent == Loading then
+                "true"
+
+             else
+                "false"
+            )
         , Attr.style "flex" "1 1 340px"
         , Attr.style "min-width" "0"
         , Attr.style "max-width" "420px"
@@ -308,7 +323,14 @@ eventCard nextEvent =
                 ]
                 [ Html.text "Luma" ]
             ]
-            :: eventCardContent nextEvent
+            :: (case nextEvent of
+                    Loading ->
+                        -- Keeps the card its usual size while the current event loads.
+                        [ Html.div [ Attr.style "visibility" "hidden" ] (eventCardContent builtNextEvent) ]
+
+                    Loaded event ->
+                        eventCardContent event
+               )
         )
 
 
@@ -344,7 +366,13 @@ eventCardContent nextEvent =
                             []
                     ]
                 )
-            , eventLink event.url "View event on Luma"
+            , eventLink event.url
+                (if String.contains "meetup.com/" event.url then
+                    "View event on Meetup"
+
+                 else
+                    "View event on Luma"
+                )
             ]
 
         Nothing ->

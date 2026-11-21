@@ -718,7 +718,7 @@ whatWeDo =
                 , Attr.style "font-weight" "600"
                 , Attr.style "color" Style.accent
                 ]
-                [ Html.text "Join fellowship" ]
+                [ Html.text "Register interest for the fellowship" ]
             ]
         , activity "Local events" "Group discussions and seminars." []
         ]

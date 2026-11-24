@@ -150,7 +150,8 @@ workingGroupOptions =
     ]
 
 
-{-| The questions on the website's form (app/Route/Join.elm), with shorter labels.
+{-| The questions on the website's form (app/Route/Join.elm), with shorter labels. The grp\_ questions are no
+longer on the form but are kept so older signups still show readable labels.
 -}
 questions : List Question
 questions =
@@ -223,6 +224,8 @@ questions =
       }
     , { name = "contrib_types_other", label = "Would contribute to (other)", options = [] }
     , { name = "initiative", label = "Activity in mind", options = [] }
+    , { name = "help_with", label = "Would like to help with", options = [] }
+    , { name = "group_capacity", label = "Working group capacity", options = [] }
     , { name = "grp_mentorship", label = "Group: Mentorship programme", options = workingGroupOptions }
     , { name = "grp_governance", label = "Group: Governance, fundraising and finances", options = workingGroupOptions }
     , { name = "grp_comms", label = "Group: Communications", options = workingGroupOptions }

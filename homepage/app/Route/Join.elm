@@ -420,7 +420,7 @@ involvementView : Html Msg
 involvementView =
     Html.fieldset fieldsetStyle
         (questionLegend "How would you like to take part in the community?" Required
-            :: helpText "If you choose \"organizing member\" we'll ask which working groups you'd like to join. If you choose \"occasional contributor\" we'll ask about the activities you'd like to contribute to."
+            :: helpText "If you choose \"organizing member\" we'll ask what you'd like to help out with. If you choose \"occasional contributor\" we'll ask about the activities you'd like to contribute to."
             :: List.map
                 (\( involvement, choice ) ->
                     choiceRow
@@ -469,51 +469,23 @@ occasionalQuestions =
 
 organizerIntro : String
 organizerIntro =
-    "This section lists the community's active working groups. Each group has its own area of responsibility and a rough list of activities.\n\nFor each group, you can choose one of these levels of involvement:\n• Coordinating: you're willing to coordinate (or co-coordinate) the group, managing its activities and presenting updates at community meetings.\n• Regular participation: you contribute regularly to the group's activities.\n• Occasional participation: you'd like to contribute now and then, on specific activities or when your skills are especially useful.\n• Not taking part in this group.\n\nYou can choose a different level for each group, for example regular participation in one and occasional in another.\n\nSome groups need more work in their first few months, depending on how urgent their initial goals are."
-
-
-workingGroup : String -> String -> String -> Question
-workingGroup name label help =
-    { name = name
-    , label = label
-    , help = help
-    , required = Required
-    , kind =
-        SingleChoice
-            [ { value = "coord", label = "Coordinating (or co-coordinating)" }
-            , { value = "stable", label = "Regular participation" }
-            , { value = "occasional", label = "Occasional participation" }
-            , { value = "none", label = "I don't want to take part in this group" }
-            ]
-    }
+    "We are in the process of building AI Safety Sweden and we are actively looking for people who can help us on that journey.\n\nWe would love to set up different working groups that would work on things such as:\n• Running a fellowship, course or mentorship programme\n• Registering as a formal association and applying for grants\n• Presenting ourselves on social media\n• Finding, onboarding and taking care of new community members\n• Maintaining and developing our website\n• Organizing community events\n• Running research seminars or public-facing lectures\n• …and more.\n\nRight now, we are just a few volunteer organizers and so we haven't set any of these working groups up. Therefore, we would love to hear your opinion on what you'd like to contribute with."
 
 
 organizerQuestions : List Question
 organizerQuestions =
-    [ workingGroup "grp_mentorship"
-        "Mentorship programme"
-        "Designs and runs the community's mentorship programme, connecting people who want to get into AI safety with people who already have experience in the field.\n\nPlanned activities:\n• Defining the programme's roles (supervisors, participants, and possibly secondary supervisors).\n• Defining the projects (type, characteristics, selection criteria).\n• Organizing the programme and its timeline.\n• Selecting projects, supervisors and participants (participants together with the supervisors).\n• Looking into offering compute grants to participants (e.g. BlueDot rapid small grants).\n• Organizing events to present and share the programme's results."
-    , workingGroup "grp_governance"
-        "Governance, fundraising and finances"
-        "Handles the community's formal structure, its financial sustainability and the day-to-day management of its finances.\n\nPlanned activities:\n• Deciding whether, and in what form, to set up an association.\n• Finding funding opportunities and grants (e.g. AI Safety Funding).\n• Preparing and submitting grant applications.\n• If no association is set up, looking into possible fiscal sponsors (e.g. Ashgro, OCEurope).\n• Looking into opening channels for donations (e.g. Manifund).\n• Managing income and expenses, and reporting on them to the community."
-    , workingGroup "grp_comms"
-        "Communications"
-        "Handles how the community presents itself: content, social media channels and incoming messages.\n\nPlanned activities:\n• Preparing content for the website.\n• Choosing and running social media platforms.\n• Creating content for social media.\n• Managing the contact email inbox."
-    , workingGroup "grp_infra"
-        "Technical infrastructure"
-        "Handles the community's digital tools.\n\nPlanned activities:\n• Building and maintaining the website.\n• Managing the web and email domains (including any subdomains and custom email addresses).\n• Running and maintaining the Discord server."
-    , workingGroup "grp_community"
-        "Community and networking"
-        "Handles who is part of the community and how people join: membership rules, finding new members and onboarding.\n\nPlanned activities:\n• Setting the rules and procedure for joining the community.\n• Finding and contacting people who might be interested.\n• Preparing the membership application form.\n• Creating and managing the member database (following the ENAIS model, which distinguishes active contributors, occasional contributors and participants).\n• Handling invitations, membership requests and onboarding of new members (including email templates for invitations, confirmations, etc.)."
-    , workingGroup "grp_events"
-        "Events"
-        "Provides logistical and practical support for the community's events.\n\nPlanned activities:\n• Organizing events in Sweden (handling registrations, finding venues, an email inbox for questions).\n• Helping organize meetups at international conferences.\n• Helping organize seminars for students and researchers.\n• Keeping the community calendar up to date.\n• Note: any community member can propose and lead an event, not just the events group. The group mainly handles the organizational side, supporting whoever proposed the event in making it happen."
-    , workingGroup "grp_seminars"
-        "Seminars"
-        "Runs seminar series for researchers, where research results are presented.\n\nPlanned activities:\n• Scheduling the seminar series.\n• Finding and contacting speakers who want to present their work.\n• Running and moderating the seminars."
-    , workingGroup "grp_outreach"
-        "Teaching and outreach"
-        "Handles outreach in education and to the public, including seminars for students.\n\nPlanned activities:\n• Preparing teaching materials.\n• Giving seminars at universities.\n• Giving outreach talks at local events.\n• Note: teaching materials don't need to be a single shared package. Everyone can run their own seminars as they like, and where there's room to collaborate, material can be combined, shared (always crediting who made it) and presented independently."
+    [ { name = "help_with"
+      , label = "What would you like to help out with for AI Safety Sweden?"
+      , help = ""
+      , required = Required
+      , kind = LongText
+      }
+    , { name = "group_capacity"
+      , label = "If you would join a working group in any of the topics you suggested, in what capacities would you like to do that?"
+      , help = "If you want to join a working group, there are different levels of involvement:\n• Coordinating: you're willing to coordinate (or co-coordinate) the group, managing its activities and presenting updates at community meetings.\n• Regular participation: you contribute regularly to the group's activities.\n• Occasional participation: you'd like to contribute now and then, on specific activities or when your skills are especially useful."
+      , required = Optional
+      , kind = LongText
+      }
     , { name = "hours_range"
       , label = "How many hours a month would you like to give to AI Safety Sweden?"
       , help = ""

@@ -51,6 +51,7 @@ type alias LoggedInModel =
     , notifyOnSignup : Bool
     , expandedSubmission : Maybe (Id SubmissionId)
     , confirmDeleteSubmission : Maybe (Id SubmissionId)
+    , hoveredChartDay : Maybe String
     }
 
 
@@ -106,6 +107,8 @@ type FrontendMsg
     | PressedDeleteSubmission (Id SubmissionId)
     | PressedConfirmDeleteSubmission (Id SubmissionId)
     | PressedCancelDeleteSubmission
+    | HoveredChartDay String
+    | UnhoveredChart
 
 
 type ToBackend

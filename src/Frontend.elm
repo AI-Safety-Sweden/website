@@ -187,6 +187,12 @@ update msg model =
                 )
                 model
 
+        HoveredChartDay day ->
+            updateLoggedIn (\loggedIn -> ( { loggedIn | hoveredChartDay = Just day }, Command.none )) model
+
+        UnhoveredChart ->
+            updateLoggedIn (\loggedIn -> ( { loggedIn | hoveredChartDay = Nothing }, Command.none )) model
+
         PressedDeleteSubmission submissionId ->
             updateLoggedIn (\loggedIn -> ( { loggedIn | confirmDeleteSubmission = Just submissionId }, Command.none )) model
 
@@ -247,6 +253,7 @@ loggedInPage data =
         , notifyOnSignup = data.notifyOnSignup
         , expandedSubmission = Nothing
         , confirmDeleteSubmission = Nothing
+        , hoveredChartDay = Nothing
         }
 
 
@@ -479,39 +486,85 @@ signupsPerDayChart zone time model =
                             , Attr.style "border-bottom" ("1px solid " ++ Style.borderStrong)
                             , Attr.style "background"
                                 ("linear-gradient(" ++ Style.border ++ ", " ++ Style.border ++ ") top / 100% 1px no-repeat")
+                            , Html.Events.onMouseLeave UnhoveredChart
                             ]
-                            (List.map
-                                (\day ->
+                            (List.indexedMap
+                                (\index day ->
                                     let
                                         count : Int
                                         count =
                                             Dict.get day counts |> Maybe.withDefault 0
+
+                                        isHovered : Bool
+                                        isHovered =
+                                            model.hoveredChartDay == Just day
                                     in
                                     Html.div
-                                        [ Attr.title
-                                            (day
-                                                ++ ": "
-                                                ++ String.fromInt count
-                                                ++ (if count == 1 then
-                                                        " signup"
-
-                                                    else
-                                                        " signups"
-                                                   )
-                                            )
+                                        [ Html.Events.onMouseEnter (HoveredChartDay day)
+                                        , Html.Events.onClick (HoveredChartDay day)
+                                        , Attr.style "position" "relative"
                                         , Attr.style "flex" "1"
                                         , Attr.style "height" "100%"
                                         , Attr.style "display" "flex"
                                         , Attr.style "align-items" "flex-end"
                                         ]
-                                        [ Html.div
+                                        (Html.div
                                             [ Attr.style "width" "100%"
                                             , Attr.style "height" (String.fromFloat (100 * toFloat count / toFloat maxCount) ++ "%")
-                                            , Attr.style "background" Style.accent
+                                            , Attr.style "background"
+                                                (if isHovered then
+                                                    Style.textStrong
+
+                                                 else
+                                                    Style.accent
+                                                )
                                             , Attr.style "border-radius" "4px 4px 0 0"
                                             ]
                                             []
-                                        ]
+                                            :: (if isHovered then
+                                                    [ Html.div
+                                                        [ Attr.style "position" "absolute"
+                                                        , Attr.style "bottom" "calc(100% + 6px)"
+                                                        , if index * 3 < List.length days then
+                                                            Attr.style "left" "0"
+
+                                                          else if index * 3 < List.length days * 2 then
+                                                            Attr.style "left" "50%"
+
+                                                          else
+                                                            Attr.style "right" "0"
+                                                        , if index * 3 < List.length days || index * 3 >= List.length days * 2 then
+                                                            Attr.style "transform" "none"
+
+                                                          else
+                                                            Attr.style "transform" "translateX(-50%)"
+                                                        , Attr.style "padding" "4px 8px"
+                                                        , Attr.style "border-radius" "6px"
+                                                        , Attr.style "background" Style.textStrong
+                                                        , Attr.style "color" Style.background
+                                                        , Attr.style "font-size" "13px"
+                                                        , Attr.style "white-space" "nowrap"
+                                                        , Attr.style "pointer-events" "none"
+                                                        , Attr.style "z-index" "1"
+                                                        ]
+                                                        [ Html.text
+                                                            (day
+                                                                ++ ": "
+                                                                ++ String.fromInt count
+                                                                ++ (if count == 1 then
+                                                                        " signup"
+
+                                                                    else
+                                                                        " signups"
+                                                                   )
+                                                            )
+                                                        ]
+                                                    ]
+
+                                                else
+                                                    []
+                                               )
+                                        )
                                 )
                                 days
                             )

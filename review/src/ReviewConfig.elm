@@ -71,5 +71,5 @@ config =
         |> List.map
             (\rule ->
                 rule
-                    |> Review.Rule.ignoreErrorsForDirectories [ "vendored", "elm-stuff" ]
+                    |> Review.Rule.ignoreErrorsForDirectories [ "vendored", "elm-stuff", "src/Evergreen" ]
             )

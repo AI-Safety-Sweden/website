@@ -3,9 +3,9 @@ module UserTable exposing
     , EditingCell
     , Msg(..)
     , UserChanges
-    , UserColumn
+    , UserColumn(..)
     , UserTable
-    , UserTableId
+    , UserTableId(..)
     , UsersChangeError(..)
     , applyChanges
     , applyEditingCell

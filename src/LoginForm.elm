@@ -1,6 +1,9 @@
 module LoginForm exposing
-    ( LoginForm
-    , Msg
+    ( EmailProblem(..)
+    , EnterEmail2
+    , EnterLoginCode2
+    , LoginForm(..)
+    , Msg(..)
     , emailNotAllowed
     , initWithEmail
     , invalidCode

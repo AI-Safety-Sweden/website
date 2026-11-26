@@ -2,6 +2,7 @@ module Frontend exposing (app, app_)
 
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation
+import Dict exposing (Dict)
 import Effect.Browser
 import Effect.Browser.Navigation as Navigation exposing (Key)
 import Effect.Command as Command exposing (Command, FrontendOnly)
@@ -312,14 +313,14 @@ view model =
                     LoginForm.view loginForm |> Html.map LoginFormMsg
 
                 LoggedIn loggedIn ->
-                    loggedInView model.zone loggedIn
+                    loggedInView model.zone model.time loggedIn
             ]
         ]
     }
 
 
-loggedInView : Time.Zone -> LoggedInModel -> Html FrontendMsg
-loggedInView zone model =
+loggedInView : Time.Zone -> Time.Posix -> LoggedInModel -> Html FrontendMsg
+loggedInView zone time model =
     Html.div
         [ Attr.style "max-width" "1100px"
         , Attr.style "margin" "0 auto"
@@ -369,6 +370,7 @@ loggedInView zone model =
                   else
                     Style.smallButton PressedExportSignups "Export as JSON"
                 ]
+            , signupsPerDayChart zone time model
             , submissionsView zone model
             ]
         , section "Users"
@@ -419,6 +421,145 @@ section title content =
         )
 
 
+signupsPerDayChart : Time.Zone -> Time.Posix -> LoggedInModel -> Html FrontendMsg
+signupsPerDayChart zone time model =
+    let
+        submittedTimes : List Time.Posix
+        submittedTimes =
+            SeqDict.values model.submissions |> List.map .submittedAt
+
+        counts : Dict String Int
+        counts =
+            List.foldl
+                (\submittedAt dict ->
+                    Dict.update
+                        (Style.date zone submittedAt)
+                        (\count -> Just (Maybe.withDefault 0 count + 1))
+                        dict
+                )
+                Dict.empty
+                submittedTimes
+    in
+    case List.minimum (List.map Time.posixToMillis submittedTimes) of
+        Just firstMillis ->
+            let
+                days : List String
+                days =
+                    daysBetween zone (Time.millisToPosix firstMillis) (Time.millisToPosix (max firstMillis (Time.posixToMillis time)))
+
+                maxCount : Int
+                maxCount =
+                    Dict.values counts |> List.maximum |> Maybe.withDefault 1
+
+                axisLabel : String -> Html msg
+                axisLabel text =
+                    Html.span [ Attr.style "font-size" "13px", Attr.style "color" Style.textFaint ] [ Html.text text ]
+            in
+            Html.div [ Attr.style "margin-bottom" "24px" ]
+                [ Html.div
+                    [ Attr.style "font-size" "14px", Attr.style "color" Style.textMuted, Attr.style "margin-bottom" "8px" ]
+                    [ Html.text "Signups per day" ]
+                , Html.div [ Attr.style "display" "flex", Attr.style "gap" "8px" ]
+                    [ Html.div
+                        [ Attr.style "display" "flex"
+                        , Attr.style "flex-direction" "column"
+                        , Attr.style "justify-content" "space-between"
+                        , Attr.style "align-items" "flex-end"
+                        , Attr.style "height" "120px"
+                        , Attr.style "margin-top" "-7px"
+                        , Attr.style "margin-bottom" "-7px"
+                        ]
+                        [ axisLabel (String.fromInt maxCount), axisLabel "0" ]
+                    , Html.div [ Attr.style "flex" "1", Attr.style "min-width" "0" ]
+                        [ Html.div
+                            [ Attr.style "display" "flex"
+                            , Attr.style "align-items" "flex-end"
+                            , Attr.style "gap" "2px"
+                            , Attr.style "height" "120px"
+                            , Attr.style "border-bottom" ("1px solid " ++ Style.borderStrong)
+                            , Attr.style "background"
+                                ("linear-gradient(" ++ Style.border ++ ", " ++ Style.border ++ ") top / 100% 1px no-repeat")
+                            ]
+                            (List.map
+                                (\day ->
+                                    let
+                                        count : Int
+                                        count =
+                                            Dict.get day counts |> Maybe.withDefault 0
+                                    in
+                                    Html.div
+                                        [ Attr.title
+                                            (day
+                                                ++ ": "
+                                                ++ String.fromInt count
+                                                ++ (if count == 1 then
+                                                        " signup"
+
+                                                    else
+                                                        " signups"
+                                                   )
+                                            )
+                                        , Attr.style "flex" "1"
+                                        , Attr.style "height" "100%"
+                                        , Attr.style "display" "flex"
+                                        , Attr.style "align-items" "flex-end"
+                                        ]
+                                        [ Html.div
+                                            [ Attr.style "width" "100%"
+                                            , Attr.style "height" (String.fromFloat (100 * toFloat count / toFloat maxCount) ++ "%")
+                                            , Attr.style "background" Style.accent
+                                            , Attr.style "border-radius" "4px 4px 0 0"
+                                            ]
+                                            []
+                                        ]
+                                )
+                                days
+                            )
+                        , Html.div
+                            [ Attr.style "display" "flex", Attr.style "justify-content" "space-between", Attr.style "margin-top" "4px" ]
+                            [ axisLabel (List.head days |> Maybe.withDefault "")
+                            , axisLabel (List.reverse days |> List.head |> Maybe.withDefault "")
+                            ]
+                        ]
+                    ]
+                ]
+
+        Nothing ->
+            Html.text ""
+
+
+{-| Every local date from the first time to the last, as Style.date strings. Steps from noon so that
+a daylight saving change can't skip or repeat a day.
+-}
+daysBetween : Time.Zone -> Time.Posix -> Time.Posix -> List String
+daysBetween zone first last =
+    let
+        noonMillis : Int
+        noonMillis =
+            Time.posixToMillis first
+                - (((Time.toHour zone first * 60 + Time.toMinute zone first) * 60 + Time.toSecond zone first) * 1000)
+                + (12 * 60 * 60 * 1000)
+
+        lastDay : String
+        lastDay =
+            Style.date zone last
+
+        step : Int -> List String -> List String
+        step millis days =
+            let
+                day : String
+                day =
+                    Style.date zone (Time.millisToPosix millis)
+            in
+            if day == lastDay || List.length days > 3660 then
+                List.reverse (day :: days)
+
+            else
+                step (millis + (24 * 60 * 60 * 1000)) (day :: days)
+    in
+    step noonMillis []
+
+
 submissionsView : Time.Zone -> LoggedInModel -> Html FrontendMsg
 submissionsView zone model =
     if SeqDict.isEmpty model.submissions then
@@ -461,7 +602,7 @@ submissionRows zone model ( submissionId, submission ) =
 
         cell : String -> Html msg
         cell text =
-            Html.td [ Attr.style "padding" "8px" ] [ Html.text text ]
+            Html.td [ Attr.style "padding" "6px 8px", Attr.style "white-space" "nowrap" ] [ Html.text text ]
     in
     Html.tr
         [ Html.Events.onClick (PressedSubmission submissionId)
@@ -479,7 +620,7 @@ submissionRows zone model ( submissionId, submission ) =
         , cell (Submission.field "first_name" submission ++ " " ++ Submission.field "last_name" submission)
         , cell (Submission.field "email" submission)
         , cell (Submission.field "city" submission)
-        , cell (Submission.field "involvement" submission)
+        , cell (Submission.involvementShort submission)
         ]
         :: (if isExpanded then
                 [ Html.tr [ Attr.style "background" Style.surface ]

@@ -1,4 +1,4 @@
-module Id exposing (Id, SubmissionId, UserId, fromInt, toInt)
+module Id exposing (Id(..), SubmissionId, UserId, fromInt, toInt)
 
 
 type Id a

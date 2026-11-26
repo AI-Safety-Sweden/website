@@ -1,4 +1,4 @@
-module Submission exposing (Answer(..), Submission, answerText, decoder, encodeReadable, field, questionLabel)
+module Submission exposing (Answer(..), Submission, answerText, decoder, encodeReadable, field, involvementShort, questionLabel)
 
 {-| A signup from the form at aisafetysweden.se/join. The website's Netlify function
 (netlify/functions/join.mjs in the website repo) sends it here as JSON:
@@ -72,6 +72,27 @@ field : String -> Submission -> String
 field name submission =
     case List.filter (\( answerName, _ ) -> answerName == name) submission.answers of
         ( _, answer ) :: _ ->
+            answerText name answer
+
+        [] ->
+            ""
+
+
+{-| A one or two word version of how they'd like to take part, for the signups table.
+-}
+involvementShort : Submission -> String
+involvementShort submission =
+    case List.filter (\( answerName, _ ) -> answerName == "involvement") submission.answers of
+        ( _, TextAnswer "participant" ) :: _ ->
+            "Participant"
+
+        ( _, TextAnswer "organizer" ) :: _ ->
+            "Organizer"
+
+        ( _, TextAnswer "occasional" ) :: _ ->
+            "Occasional"
+
+        ( name, answer ) :: _ ->
             answerText name answer
 
         [] ->

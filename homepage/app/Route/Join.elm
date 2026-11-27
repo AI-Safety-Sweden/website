@@ -9,13 +9,16 @@ import Head.Seo as Seo
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events
+import Json.Decode
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import PagesMsg exposing (PagesMsg)
+import Process
 import RouteBuilder exposing (App, StatefulRoute)
 import Set exposing (Set)
 import Shared
 import Style
+import Task
 import UrlPath exposing (UrlPath)
 import View exposing (View)
 
@@ -24,6 +27,7 @@ type alias Model =
     { city : String
     , involvement : Maybe Involvement
     , checked : Dict String (Set String)
+    , submitting : Bool
     }
 
 
@@ -38,6 +42,8 @@ type Msg
     | SelectedInvolvement Involvement
     | ToggledCheckbox String String Bool
     | TypedOther String String
+    | SubmittedForm
+    | SubmitTimedOut
 
 
 type alias RouteParams =
@@ -73,7 +79,7 @@ data =
 
 init : App Data ActionData RouteParams -> Shared.Model -> ( Model, Effect Msg )
 init app _ =
-    ( { city = cityFromUrl app.url, involvement = Nothing, checked = Dict.empty }, Effect.none )
+    ( { city = cityFromUrl app.url, involvement = Nothing, checked = Dict.empty, submitting = False }, Effect.none )
 
 
 {-| The homepage's "Find your local group" links here with ?city=<city> to fill in the city question.
@@ -126,6 +132,14 @@ update _ _ msg model =
                         Maybe.withDefault Set.empty (Dict.get name model.checked)
                 in
                 ( { model | checked = Dict.insert name (Set.insert "other" checked) model.checked }, Effect.none )
+
+        SubmittedForm ->
+            ( { model | submitting = True }
+            , Process.sleep 10000 |> Task.perform (\() -> SubmitTimedOut) |> Effect.fromCmd
+            )
+
+        SubmitTimedOut ->
+            ( { model | submitting = False }, Effect.none )
 
 
 subscriptions : RouteParams -> UrlPath -> Shared.Model -> Model -> Sub Msg
@@ -195,6 +209,7 @@ page model =
             , Html.form
                 [ Attr.method "post"
                 , Attr.action "/api/join"
+                , Html.Events.on "submit" (Json.Decode.succeed SubmittedForm)
                 , Attr.style "margin-top" "48px"
                 , Attr.style "display" "flex"
                 , Attr.style "flex-direction" "column"
@@ -231,7 +246,7 @@ page model =
                             []
                     , [ honeypot
                       , consentView
-                      , submitButton
+                      , submitButton model.submitting
                       ]
                     ]
                 )
@@ -768,10 +783,14 @@ consentView =
         ]
 
 
-submitButton : Html msg
-submitButton =
+{-| Disabled while the signup is being sent, so that pressing it again doesn't send it twice. It
+comes back after 10 seconds in case the page is shown again with the Back button.
+-}
+submitButton : Bool -> Html msg
+submitButton submitting =
     Html.button
         [ Attr.type_ "submit"
+        , Attr.disabled submitting
         , Attr.style "align-self" "flex-start"
         , Attr.style "padding" "18px 32px"
         , Attr.style "border" "none"
@@ -781,6 +800,26 @@ submitButton =
         , Attr.style "font" "inherit"
         , Attr.style "font-size" "20px"
         , Attr.style "font-weight" "600"
-        , Attr.style "cursor" "pointer"
+        , Attr.style "cursor"
+            (if submitting then
+                "wait"
+
+             else
+                "pointer"
+            )
+        , Attr.style "opacity"
+            (if submitting then
+                "0.6"
+
+             else
+                "1"
+            )
         ]
-        [ Html.text "Sign up" ]
+        [ Html.text
+            (if submitting then
+                "Signing up…"
+
+             else
+                "Sign up"
+            )
+        ]
